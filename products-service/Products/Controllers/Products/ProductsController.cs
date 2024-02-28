@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Products.Extensions;
 using Products.Model;
 using Products.Services;
@@ -7,6 +8,7 @@ using Products.Services.Results;
 namespace Products.Controllers.Products;
 
 [Route("api/products")]
+[Authorize]
 [ApiController]
 [ProducesResponseType(StatusCodes.Status401Unauthorized)]
 public class ProductsController(IProductService productService) : ControllerBase
