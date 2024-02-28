@@ -10,12 +10,14 @@ public class ProductRepository(ProductsDbContext dbContext) : IProductRepository
 
     public async Task<IList<Product>> GetAllAsync() =>
         await _dbContext.Products
+        .AsNoTracking()
         .Select(x => x.ToModel())
         .ToListAsync();
 
     public async Task<Product?> GetByIdAsync(int id)
     {
         var entity = await _dbContext.Products
+            .AsNoTracking()
             .SingleOrDefaultAsync(x => x.Id == id);
 
         return entity?.ToModel();
@@ -30,5 +32,14 @@ public class ProductRepository(ProductsDbContext dbContext) : IProductRepository
         await _dbContext.SaveChangesAsync();
 
         return product with { Id = entity.Id };
+    }
+
+    public async Task UpdateAsync(Product product)
+    {
+        var entity = product.ToEntity();
+
+        _dbContext.Products.Update(entity);
+
+        await _dbContext.SaveChangesAsync();
     }
 }

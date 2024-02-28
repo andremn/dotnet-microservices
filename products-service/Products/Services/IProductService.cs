@@ -10,4 +10,6 @@ public interface IProductService
     Task<Product?> FindByIdAsync(int id);
 
     Task<CreateProductResult> CreateAsync(Product product);
+
+    Task<UpdateProductResult> UpdateAsync(Product product);
 }

@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using FluentValidation;
 using FluentValidation.Results;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Moq;
 using Products.Model;
 using Products.Repositories;
@@ -101,7 +102,7 @@ public class ProductServiceTests
     }
 
     [Fact]
-    public async Task CreateAsync_ValidProduct_ReturnsSuccessWithProductData()
+    public async Task CreateAsync_ValidProduct_ReturnsSuccessWithProductId()
     {
         // Arrange
         var createdId = 121;
@@ -115,7 +116,7 @@ public class ProductServiceTests
         _productRepositoryMock.Setup(x => x.CreateAsync(productToCreate))
             .ReturnsAsync(productToCreate with { Id = createdId });
 
-        var expectedResult = CreateProductResult.FromSuccess(createdId);
+        var expectedResult = new CreateProductResult(true, createdId, ResultErrorReason.None, new Dictionary<string, string>(0));
 
         _productValidatorMock.Setup(x => x.Validate(productToCreate)).Returns(new ValidationResult());
 
@@ -127,7 +128,7 @@ public class ProductServiceTests
     }
 
     [Fact]
-    public async Task CreateAsync_InvalidProduct_ReturnsSuccessWithProductData()
+    public async Task CreateAsync_InvalidProduct_ReturnsErrorWithValidationReasonAndErrorMessages()
     {
         // Arrange
         var productToCreate = new Product(
@@ -146,12 +147,117 @@ public class ProductServiceTests
 
         var validationResult = new ValidationResult(expectedErrors.Select(x => new ValidationFailure(x.Key, x.Value)));
 
-        var expectedResult = CreateProductResult.FromError(expectedErrors);
+        var expectedResult = new CreateProductResult(false, 0, ResultErrorReason.Validation, expectedErrors);
 
         _productValidatorMock.Setup(x => x.Validate(productToCreate)).Returns(validationResult);
 
         // Act
         var actualResult = await _productService.CreateAsync(productToCreate);
+
+        // Assert
+        actualResult.Should().BeEquivalentTo(expectedResult);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_ValidProduct_ReturnsSuccess()
+    {
+        // Arrange
+        var existingProduct = new Product(
+            Id: 10,
+            Name: "Keyboard old",
+            Description: "Keyboard without RGB lights",
+            Quantity: 89,
+            Price: 14.98m);
+
+        var productToUpdate = new Product(
+            Id: 121,
+            Name: "Keyboard",
+            Description: "Keyboard with RGB lights",
+            Quantity: 110,
+            Price: 55.99m);
+
+        _productRepositoryMock.Setup(x => x.GetByIdAsync(productToUpdate.Id))
+            .ReturnsAsync(existingProduct);
+
+        var expectedResult = new UpdateProductResult(true, ResultErrorReason.None, new Dictionary<string, string>(0));
+
+        _productValidatorMock.Setup(x => x.Validate(productToUpdate)).Returns(new ValidationResult());
+
+        // Act
+        var actualResult = await _productService.UpdateAsync(productToUpdate);
+
+        // Assert
+        actualResult.Should().BeEquivalentTo(expectedResult);
+
+        _productRepositoryMock.Verify(x => x.UpdateAsync(productToUpdate));
+    }
+
+    [Fact]
+    public async Task UpdateAsync_InvalidProduct_ReturnsErrorWithValidationReasonAndErrorMessages()
+    {
+        // Arrange
+        var existingProduct = new Product(
+            Id: 10,
+            Name: "Keyboard",
+            Description: "Keyboard with RGB lights",
+            Quantity: 110,
+            Price: 55.99m);
+
+        var productToUpdate = new Product(
+            Id: 10,
+            Name: "",
+            Description: "Keyboard with RGB lights",
+            Quantity: -110,
+            Price: -55.99m);
+
+        var expectedErrors = new Dictionary<string, string>
+        {
+            ["name"] = "'Name' must be non-empty",
+            ["price"] = "'Price' must be greater than or equal to 0",
+            ["quantity"] = "'Quantity' must be greater than or equal to 0",
+        };
+
+        _productRepositoryMock.Setup(x => x.GetByIdAsync(productToUpdate.Id))
+            .ReturnsAsync(existingProduct);
+
+        var validationResult = new ValidationResult(expectedErrors.Select(x => new ValidationFailure(x.Key, x.Value)));
+
+        var expectedResult = new UpdateProductResult(false, ResultErrorReason.Validation, expectedErrors);
+
+        _productValidatorMock.Setup(x => x.Validate(productToUpdate)).Returns(validationResult);
+
+        // Act
+        var actualResult = await _productService.UpdateAsync(productToUpdate);
+
+        // Assert
+        actualResult.Should().BeEquivalentTo(expectedResult);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_NotFoundProduct_ReturnsErrorWithNotFoundReason()
+    {
+        // Arrange
+        var productToUpdate = new Product(
+            Id: 10,
+            Name: "",
+            Description: "Keyboard with RGB lights",
+            Quantity: -110,
+            Price: -55.99m);
+
+        var expectedErrors = new Dictionary<string, string>
+        {
+            ["name"] = "'Name' must be non-empty",
+            ["price"] = "'Price' must be greater than or equal to 0",
+            ["quantity"] = "'Quantity' must be greater than or equal to 0",
+        };
+
+        var expectedResult = new UpdateProductResult(false, ResultErrorReason.NotFound, new Dictionary<string, string>(0));
+
+        _productRepositoryMock.Setup(x => x.GetByIdAsync(productToUpdate.Id))
+            .ReturnsAsync((Product?)null);
+
+        // Act
+        var actualResult = await _productService.UpdateAsync(productToUpdate);
 
         // Assert
         actualResult.Should().BeEquivalentTo(expectedResult);

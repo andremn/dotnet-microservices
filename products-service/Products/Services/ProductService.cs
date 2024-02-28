@@ -1,7 +1,9 @@
 ﻿using FluentValidation;
+using FluentValidation.Results;
 using Products.Model;
 using Products.Repositories;
 using Products.Services.Results;
+using System.ComponentModel.DataAnnotations;
 
 namespace Products.Services;
 
@@ -27,7 +29,28 @@ public class ProductService(IProductRepository productRepository, IValidator<Pro
             return CreateProductResult.FromSuccess(product.Id);
         }
 
-        return CreateProductResult.FromError(
-            validationResult.Errors.ToDictionary(k => k.PropertyName, v => v.ErrorMessage));
+        return CreateProductResult.FromError(validationResult.Errors.ToDictionary(k => k.PropertyName, v => v.ErrorMessage));
     }
+
+    public async Task<UpdateProductResult> UpdateAsync(Product product)
+    {
+        if (await _productRepository.GetByIdAsync(product.Id) == null)
+        {
+            return UpdateProductResult.FromNotFoundError();
+        }
+
+        var validationResult = _productValidator.Validate(product);
+
+        if (validationResult.IsValid)
+        {
+            await _productRepository.UpdateAsync(product);
+
+            return UpdateProductResult.FromSuccess();
+        }
+
+        return UpdateProductResult.FromValidationError(ConvertValidationFailureToDictionary(validationResult.Errors));
+    }
+
+    private static Dictionary<string, string> ConvertValidationFailureToDictionary(List<ValidationFailure> validationFailures) =>
+        validationFailures.ToDictionary(k => k.PropertyName, v => v.ErrorMessage);
 }

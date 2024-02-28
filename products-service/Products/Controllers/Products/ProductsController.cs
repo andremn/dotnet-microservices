@@ -2,6 +2,7 @@
 using Products.Extensions;
 using Products.Model;
 using Products.Services;
+using Products.Services.Results;
 
 namespace Products.Controllers.Products;
 
@@ -47,5 +48,20 @@ public class ProductsController(IProductService productService) : ControllerBase
         }
 
         return BadRequest(result.Errors);
+    }
+
+    [HttpPut]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(Dictionary<string, string>), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult> Put([FromBody] UpdateProductRequest request)
+    {
+        var result = await _productService.UpdateAsync(request.ToModel());
+
+        if (result.Success)
+        {
+            return NoContent();
+        }
+
+        return result.ErrorReason == ResultErrorReason.NotFound ? NotFound() : BadRequest(result.Errors);
     }
 }
