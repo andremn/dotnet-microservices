@@ -22,7 +22,7 @@ public class UsersController(
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] CreateUserRequest request)
     {
-        var user = new User(request.FirstName, request.LastName, request.Email);
+        var user = new User(Id: string.Empty, request.FirstName, request.LastName, request.Email);
 
         var createResult = await _userService.CreateUserAsync(user, request.Password);
 
@@ -56,6 +56,7 @@ public class UsersController(
 
         var claims = new List<Claim>
         {
+            new(Constants.UserIdClaimType, user.Id),
             new(Constants.UserEmailClaimType, user.Email),
             new(Constants.UserFirstNameClaimType, user.FirstName),
             new(Constants.UserLastNameClaimType, user.LastName)
