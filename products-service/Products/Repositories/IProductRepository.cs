@@ -1,0 +1,11 @@
+﻿using Products.Model;
+
+namespace Products.Repositories;
+public interface IProductRepository
+{
+    Task<Product> CreateAsync(Product product);
+
+    Task<IList<Product>> GetAllAsync();
+
+    Task<Product?> GetByIdAsync(int id);
+}

@@ -4,6 +4,6 @@ using Products.Repositories.Entities;
 
 namespace Products.Repositories;
 
-public class UserDbContext(DbContextOptions options) : IdentityDbContext<UserEntity>(options)
+public class UserDbContext(DbContextOptions<UserDbContext> options) : IdentityDbContext<UserEntity>(options)
 {
 }

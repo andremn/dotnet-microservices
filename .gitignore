@@ -399,3 +399,5 @@ FodyWeavers.xsd
 *.db
 /products-service/Products/User.db-wal
 /products-service/Products/User.db-shm
+/products-service/Products/Products.db-shm
+/products-service/Products/Products.db-wal

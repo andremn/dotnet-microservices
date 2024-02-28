@@ -10,7 +10,7 @@ using System.Text;
 
 namespace Products.Controllers.Users;
 
-[Route("api/[controller]")]
+[Route("api/users")]
 [ApiController]
 public class UsersController(
     IUserService userService,
