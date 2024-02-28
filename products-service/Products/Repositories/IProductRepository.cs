@@ -7,6 +7,8 @@ public interface IProductRepository
 
     Task<IList<Product>> GetAllAsync();
 
+    Task<IList<Product>> GetAllByIdsAsync(IEnumerable<int> ids);
+
     Task<Product?> GetByIdAsync(int id);
 
     Task UpdateAsync(Product product);

@@ -11,8 +11,15 @@ public class ProductService(IProductRepository productRepository, IValidator<Pro
     private readonly IProductRepository _productRepository = productRepository;
     private readonly IValidator<Product> _productValidator = productValidator;
 
-    public async Task<IList<Product>> GetAllAsync() =>
-        await _productRepository.GetAllAsync();
+    public async Task<IList<Product>> GetAllAsync(IEnumerable<int> ids)
+    {
+        if (ids.Any())
+        {
+            return await _productRepository.GetAllByIdsAsync(ids);
+        }
+
+        return await _productRepository.GetAllAsync();
+    }
 
     public async Task<Product?> FindByIdAsync(int id) =>
         await _productRepository.GetByIdAsync(id);

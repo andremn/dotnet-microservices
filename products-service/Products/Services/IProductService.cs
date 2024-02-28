@@ -5,7 +5,7 @@ namespace Products.Services;
 
 public interface IProductService
 {
-    Task<IList<Product>> GetAllAsync();
+    Task<IList<Product>> GetAllAsync(IEnumerable<int> ids);
 
     Task<Product?> FindByIdAsync(int id);
 

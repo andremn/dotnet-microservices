@@ -14,6 +14,13 @@ public class ProductRepository(ProductsDbContext dbContext) : IProductRepository
         .Select(x => x.ToModel())
         .ToListAsync();
 
+    public async Task<IList<Product>> GetAllByIdsAsync(IEnumerable<int> ids) =>
+        await _dbContext.Products
+        .AsNoTracking()
+        .Where(x => ids.Any(y => y == x.Id))
+        .Select(x => x.ToModel())
+        .ToListAsync();
+
     public async Task<Product?> GetByIdAsync(int id)
     {
         var entity = await _dbContext.Products

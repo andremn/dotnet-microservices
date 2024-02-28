@@ -17,8 +17,8 @@ public class ProductsController(IProductService productService) : ControllerBase
 
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<Product>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<IEnumerable<Product>>> Get() =>
-        Ok(await _productService.GetAllAsync());
+    public async Task<ActionResult<IEnumerable<Product>>> Get([FromQuery] IEnumerable<int> ids) =>
+        Ok(await _productService.GetAllAsync(ids));
 
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(Product), StatusCodes.Status200OK)]

@@ -40,7 +40,7 @@ public class UserRepository(
 
         if (existingUser != null)
         {
-            return new User(existingUser.FirstName, existingUser.LastName, email);
+            return new User(existingUser.Id, existingUser.FirstName, existingUser.LastName, email);
         }
 
         return null;
