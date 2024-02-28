@@ -46,9 +46,19 @@ public class UsersController(
 
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtConfig.Key));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+        var getUserResult = await _userService.GetUserByEmailAsync(request.Email);
+        var user = getUserResult.User;
+
+        if (user is null)
+        {
+            return Forbid();
+        }
+
         var claims = new List<Claim>
         {
-            new(ClaimTypes.Name, request.Email)
+            new(Constants.UserEmailClaimType, user.Email),
+            new(Constants.UserFirstNameClaimType, user.FirstName),
+            new(Constants.UserLastNameClaimType, user.LastName)
         };
 
         var securityToken = new JwtSecurityToken(
