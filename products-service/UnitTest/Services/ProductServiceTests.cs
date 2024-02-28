@@ -1,7 +1,6 @@
 ﻿using FluentAssertions;
 using FluentValidation;
 using FluentValidation.Results;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Moq;
 using Products.Model;
 using Products.Repositories;
@@ -189,7 +188,7 @@ public class ProductServiceTests
         // Assert
         actualResult.Should().BeEquivalentTo(expectedResult);
 
-        _productRepositoryMock.Verify(x => x.UpdateAsync(productToUpdate));
+        _productRepositoryMock.Verify(x => x.UpdateAsync(productToUpdate), Times.Once);
     }
 
     [Fact]
@@ -258,6 +257,56 @@ public class ProductServiceTests
 
         // Act
         var actualResult = await _productService.UpdateAsync(productToUpdate);
+
+        // Assert
+        actualResult.Should().BeEquivalentTo(expectedResult);
+    }
+
+    [Fact]
+    public async Task DeleteByIdAsync_ExistingProduct_ReturnsSuccess()
+    {
+        // Arrange
+        var idToDelete = 10;
+        var existingProduct = new Product(
+            Id: idToDelete,
+            Name: "Keyboard old",
+            Description: "Keyboard without RGB lights",
+            Quantity: 89,
+            Price: 14.98m);
+
+        var expectedResult = new DeleteProductResult(true);
+
+        _productRepositoryMock.Setup(x => x.GetByIdAsync(idToDelete))
+            .ReturnsAsync(existingProduct);
+
+        // Act
+        var actualResult = await _productService.DeleteByIdAsync(idToDelete);
+
+        // Assert
+        actualResult.Should().BeEquivalentTo(expectedResult);
+
+        _productRepositoryMock.Verify(x => x.DeleteAsync(existingProduct), Times.Once);
+    }
+
+    [Fact]
+    public async Task DeleteByIdAsync_NotFoundProduct_ReturnsErrorWithNotFoundReason()
+    {
+        // Arrange
+        var idToDelete = 10;
+        var existingProduct = new Product(
+            Id: idToDelete,
+            Name: "Keyboard old",
+            Description: "Keyboard without RGB lights",
+            Quantity: 89,
+            Price: 14.98m);
+
+        var expectedResult = new DeleteProductResult(false);
+
+        _productRepositoryMock.Setup(x => x.GetByIdAsync(idToDelete))
+            .ReturnsAsync((Product?)null);
+
+        // Act
+        var actualResult = await _productService.DeleteByIdAsync(idToDelete);
 
         // Assert
         actualResult.Should().BeEquivalentTo(expectedResult);

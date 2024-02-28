@@ -52,6 +52,7 @@ public class ProductsController(IProductService productService) : ControllerBase
 
     [HttpPut]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(Dictionary<string, string>), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> Put([FromBody] UpdateProductRequest request)
     {
@@ -63,5 +64,15 @@ public class ProductsController(IProductService productService) : ControllerBase
         }
 
         return result.ErrorReason == ResultErrorReason.NotFound ? NotFound() : BadRequest(result.Errors);
+    }
+
+    [HttpDelete("{id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> Delete([FromRoute] int id)
+    {
+        var result = await _productService.DeleteByIdAsync(id);
+
+        return result.Success ? NoContent() : NotFound();
     }
 }

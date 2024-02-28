@@ -3,7 +3,6 @@ using FluentValidation.Results;
 using Products.Model;
 using Products.Repositories;
 using Products.Services.Results;
-using System.ComponentModel.DataAnnotations;
 
 namespace Products.Services;
 
@@ -49,6 +48,20 @@ public class ProductService(IProductRepository productRepository, IValidator<Pro
         }
 
         return UpdateProductResult.FromValidationError(ConvertValidationFailureToDictionary(validationResult.Errors));
+    }
+
+    public async Task<DeleteProductResult> DeleteByIdAsync(int id)
+    {
+        var existingProduct = await _productRepository.GetByIdAsync(id);
+
+        if (existingProduct == null)
+        {
+            return DeleteProductResult.FromNotFoundError();
+        }
+
+        await _productRepository.DeleteAsync(existingProduct);
+
+        return DeleteProductResult.FromSuccess();
     }
 
     private static Dictionary<string, string> ConvertValidationFailureToDictionary(List<ValidationFailure> validationFailures) =>

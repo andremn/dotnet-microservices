@@ -42,4 +42,13 @@ public class ProductRepository(ProductsDbContext dbContext) : IProductRepository
 
         await _dbContext.SaveChangesAsync();
     }
+
+    public async Task DeleteAsync(Product product)
+    {
+        var entity = product.ToEntity();
+
+        _dbContext.Products.Remove(entity);
+
+        await _dbContext.SaveChangesAsync();
+    }
 }

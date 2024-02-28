@@ -217,4 +217,36 @@ public class ProductsControllerTests
         badRequestResult.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
         badRequestResult.Value.As<Dictionary<string, string>>().Should().BeEquivalentTo(expectedErrors);
     }
+
+    [Fact]
+    public async Task Delete_ExistingProduct_Returns204NoContent()
+    {
+        // Arrange
+        var idToDelete = 15;
+
+        _productServiceMock.Setup(x => x.DeleteByIdAsync(idToDelete))
+            .ReturnsAsync(new DeleteProductResult(true));
+
+        // Act
+        var result = await _productsController.Delete(idToDelete);
+
+        // Assert
+        result.As<NoContentResult>().StatusCode.Should().Be(StatusCodes.Status204NoContent);
+    }
+
+    [Fact]
+    public async Task Delete_NonExistingProduct_Returns404NotFound()
+    {
+        // Arrange
+        var invalidId = 212;
+
+        _productServiceMock.Setup(x => x.DeleteByIdAsync(invalidId))
+            .ReturnsAsync(new DeleteProductResult(false));
+
+        // Act
+        var result = await _productsController.Delete(invalidId);
+
+        // Assert
+        result.As<NotFoundResult>().StatusCode.Should().Be(StatusCodes.Status404NotFound);
+    }
 }

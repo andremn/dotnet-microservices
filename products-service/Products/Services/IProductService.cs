@@ -12,4 +12,6 @@ public interface IProductService
     Task<CreateProductResult> CreateAsync(Product product);
 
     Task<UpdateProductResult> UpdateAsync(Product product);
+
+    Task<DeleteProductResult> DeleteByIdAsync(int id);
 }

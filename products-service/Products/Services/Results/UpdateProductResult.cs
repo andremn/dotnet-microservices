@@ -1,6 +1,4 @@
-﻿using static System.Runtime.InteropServices.JavaScript.JSType;
-
-namespace Products.Services.Results;
+﻿namespace Products.Services.Results;
 
 public record UpdateProductResult(bool Success, ResultErrorReason ErrorReason, IDictionary<string, string> Errors)
 {

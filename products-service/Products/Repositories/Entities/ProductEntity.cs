@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-
-namespace Products.Repositories.Entities;
+﻿namespace Products.Repositories.Entities;
 
 public class ProductEntity
 {
