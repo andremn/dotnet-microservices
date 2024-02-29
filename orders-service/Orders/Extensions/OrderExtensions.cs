@@ -21,5 +21,8 @@ public static class OrderExtensions
         };
 
     public static OrderChangeMessage ToChangeMessage(this Order order) =>
-        new(order.Id, order.ProductId, order.UserId, order.Status, order.CreatedAt);
+        new(order.Id, order.ProductId, order.UserId, order.Price, order.Status, order.CreatedAt);
+
+    public static Order ToModel(this OrderChangeMessage message) =>
+        new(message.Id, message.ProductId, message.UserId, message.Price, message.Status, message.UpdatedAt);
 }

@@ -5,7 +5,10 @@ public enum OrderStatus
     Created = 0,
     AwaitingPayment = 1,
     PaymentConfirmed = 2,
-    AwaitingShipping = 3,
-    Shipped = 4,
-    Finished = 5
+    PaymentDenied = 3,
+    AwaitingShipping = 4,
+    Shipped = 5,
+    DeliveryFailed = 6,
+    Finished = 7,
+    Canceled = 8
 }

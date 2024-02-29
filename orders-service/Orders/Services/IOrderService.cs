@@ -9,4 +9,6 @@ public interface IOrderService
     Task<GetDetailedOrderResult> GetByIdAsync(int id);
 
     Task<CreateOrderResult> CreateAsync(int productId);
+
+    Task<UpdateOrderResult> UpdateAsync(Order order);
 }

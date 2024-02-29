@@ -32,4 +32,15 @@ public class OrderRepository(OrdersDbContext dbContext) : IOrderRepository
 
         return order with { Id = entity.Id };
     }
+
+    public async Task<Order> UpdateAsync(Order order)
+    {
+        var entity = order.ToEntity();
+
+        dbContext.Orders.Update(entity);
+
+        await dbContext.SaveChangesAsync();
+
+        return order;
+    }
 }

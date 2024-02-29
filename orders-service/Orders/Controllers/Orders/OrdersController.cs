@@ -35,13 +35,13 @@ public class OrdersController(IOrderService orderService) : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(IList<DetailedOrder>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> Post([FromBody] CreateOrderRequest request)
+    public async Task<ActionResult> Post([FromBody] PostRequest request)
     {
         var result = await orderService.CreateAsync(request.ProductId);
 
-        if (result.Success)
+        if (result.IsSuccess)
         {
-            var response = new CreateOrderResponse(result.Id);
+            var response = new PostResponse(result.Id);
 
             return CreatedAtAction(nameof(GetById), response, response);
         }

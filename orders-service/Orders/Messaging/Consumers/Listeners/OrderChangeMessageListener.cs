@@ -1,12 +1,13 @@
-﻿using Orders.Messaging.Messages;
+﻿using Orders.Extensions;
+using Orders.Messaging.Messages;
 using Orders.Services;
 
 namespace Orders.Messaging.Consumers.Listeners;
 
-public class OrderChangeMessageListener(IOrderService orderService) : IListener<OrderChangeMessage>
+public class OrderChangeMessageListener(IOrderProcessingService orderProcessingService) : IListener<OrderChangeMessage>
 {
     public async Task OnMessageReceived(OrderChangeMessage message)
     {
-        await orderService.CreateAsync(0);
+        await orderProcessingService.HandleOrderChangedAsync(message.ToModel());
     }
 }

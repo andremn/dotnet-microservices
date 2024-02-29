@@ -18,6 +18,10 @@ public static class IServiceCollectionExtensions
 
         services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddScoped<IOrderService, OrderService>();
+        services.AddScoped<IOrderProcessingService, OrderProcessingService>();
+
+        services.AddScoped<IPaymentService, PaymentService>();
+        services.AddScoped<IShippingService, ShippingService>();
 
         var productsServiceAddress = configuration.GetSection("ProductsService:BaseAddress").Value 
             ?? throw new InvalidOperationException("Invalid address for the Products service");
