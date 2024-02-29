@@ -1,4 +1,6 @@
-﻿namespace Orders.Repositories.Entities;
+﻿using Orders.Model;
+
+namespace Orders.Repositories.Entities;
 
 public class OrderEntity
 {
@@ -9,6 +11,8 @@ public class OrderEntity
     public string UserId { get; set; } = string.Empty;
 
     public decimal Price { get; set; }
+
+    public OrderStatus Status { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
