@@ -401,3 +401,5 @@ FodyWeavers.xsd
 /products-service/Products/User.db-shm
 /products-service/Products/Products.db-shm
 /products-service/Products/Products.db-wal
+/orders-service/Orders/Orders.db-shm
+/orders-service/Orders/Orders.db-wal
