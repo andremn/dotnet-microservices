@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Orders.Model;
 using Orders.Services;
-using Orders.Services.Results;
 
 namespace Orders.Controllers.Orders;
 

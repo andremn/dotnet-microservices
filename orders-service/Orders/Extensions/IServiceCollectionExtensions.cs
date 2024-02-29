@@ -1,4 +1,10 @@
-﻿using Orders.Repositories;
+﻿using Orders.Messaging;
+using Orders.Messaging.Consumers;
+using Orders.Messaging.Consumers.Listeners;
+using Orders.Messaging.Messages;
+using Orders.Messaging.Producers;
+using Orders.Messaging.Producers.Publishers;
+using Orders.Repositories;
 using Orders.Services;
 using Refit;
 
@@ -18,6 +24,13 @@ public static class IServiceCollectionExtensions
 
         services.AddRefitClient<IProductService>()
             .ConfigureHttpClient(c => c.BaseAddress = new Uri(productsServiceAddress));
+
+        services.AddSingleton<IRabbitMqService, RabbitMqService>();
+        services.AddSingleton<IRabbitMqConsumerService, RabbitMqOrdersConsumerService>();
+        services.AddSingleton<IRabbitMqProducerService, RabbitMqProducerService>();
+
+        services.AddTransient<IListener<OrderChangeMessage>, OrderChangeMessageListener>();
+        services.AddTransient<IPublisher<OrderChangeMessage>, OrderChangeMessagePublisher>();
 
         return services;
     }

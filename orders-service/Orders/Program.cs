@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Orders.Configurations;
 using Orders.Extensions;
 using Orders.Repositories;
 using System.Text;
@@ -10,6 +11,8 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 var jtwIssuer = builder.Configuration.GetSection("Jwt:Issuer").Value ?? string.Empty;
 var jtwKey = builder.Configuration.GetSection("Jwt:Key").Value ?? string.Empty;
+
+builder.Services.Configure<RabbitMqConfig>(builder.Configuration.GetSection("RabbitMq"));
 
 builder.Services.AddDbContext<OrdersDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("OrdersDb")));
@@ -78,6 +81,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseRabbitMqConsumers();
 
 app.UseHttpsRedirection();
 

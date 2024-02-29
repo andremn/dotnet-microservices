@@ -1,4 +1,4 @@
-﻿using Orders.Controllers.Orders;
+﻿using Orders.Messaging.Messages;
 using Orders.Model;
 using Orders.Repositories.Entities;
 
@@ -19,4 +19,7 @@ public static class OrderExtensions
             Status = order.Status,
             CreatedAt = order.CreatedAt
         };
+
+    public static OrderChangeMessage ToChangeMessage(this Order order) =>
+        new(order.Id, order.ProductId, order.UserId, order.Status, order.CreatedAt);
 }

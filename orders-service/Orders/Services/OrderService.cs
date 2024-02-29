@@ -1,10 +1,14 @@
-﻿using Orders.Model;
+﻿using Orders.Extensions;
+using Orders.Messaging.Messages;
+using Orders.Messaging.Producers.Publishers;
+using Orders.Model;
 using Orders.Repositories;
 using Orders.Services.Results;
 
 namespace Orders.Services;
 
 public class OrderService(
+    IPublisher<OrderChangeMessage> orderChangePublisher,
     IProductService productService,
     ILoggedUserService loggedUserService,
     IOrderRepository orderRepository) : IOrderService
@@ -62,6 +66,8 @@ public class OrderService(
             var order = new Order(Id: 0, productId, currentUser.Id, product.Price, OrderStatus.Created, DateTime.UtcNow);
 
             order = await orderRepository.CreateAsync(order);
+
+            orderChangePublisher.Publish(order.ToChangeMessage());
 
             return CreateOrderResult.FromSuccess(order.Id);
         }
