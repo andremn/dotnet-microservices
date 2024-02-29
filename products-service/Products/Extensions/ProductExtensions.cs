@@ -22,6 +22,6 @@ public static class ProductExtensions
     public static Product ToModel(this CreateProductRequest request) =>
         new(Id: 0, request.Name, request.Description, request.Quantity, request.Price);
 
-    public static Product ToModel(this UpdateProductRequest request) =>
-        new(Id: request.Id, request.Name, request.Description, request.Quantity, request.Price);
+    public static Product ToModel(this UpdateProductRequest request, int id) =>
+        new(Id: id, request.Name, request.Description, request.Quantity, request.Price);
 }

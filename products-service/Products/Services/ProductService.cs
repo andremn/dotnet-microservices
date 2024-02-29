@@ -6,7 +6,10 @@ using Products.Services.Results;
 
 namespace Products.Services;
 
-public class ProductService(IProductRepository productRepository, IValidator<Product> productValidator) : IProductService
+public class ProductService(
+    IProductRepository productRepository,
+    IValidator<Product> productValidator
+) : IProductService
 {
     private readonly IProductRepository _productRepository = productRepository;
     private readonly IValidator<Product> _productValidator = productValidator;
@@ -50,6 +53,28 @@ public class ProductService(IProductRepository productRepository, IValidator<Pro
         if (validationResult.IsValid)
         {
             await _productRepository.UpdateAsync(product);
+
+            return UpdateProductResult.FromSuccess();
+        }
+
+        return UpdateProductResult.FromValidationError(ConvertValidationFailureToDictionary(validationResult.Errors));
+    }
+
+    public async Task<UpdateProductResult> UpdateQuantityAsync(int id, int quantity)
+    {
+        var existingProduct = await _productRepository.GetByIdAsync(id);
+
+        if (existingProduct == null)
+        {
+            return UpdateProductResult.FromNotFoundError();
+        }
+
+        var productToUpdate = existingProduct with { Quantity = quantity };
+        var validationResult = _productValidator.Validate(productToUpdate);
+
+        if (validationResult.IsValid)
+        {
+            await _productRepository.UpdateAsync(productToUpdate);
 
             return UpdateProductResult.FromSuccess();
         }

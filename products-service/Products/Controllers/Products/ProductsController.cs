@@ -52,13 +52,31 @@ public class ProductsController(IProductService productService) : ControllerBase
         return BadRequest(result.Errors);
     }
 
-    [HttpPut]
+    [HttpPut("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(Dictionary<string, string>), StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult> Put([FromBody] UpdateProductRequest request)
+    public async Task<ActionResult> Put([FromRoute] int id, [FromBody] UpdateProductRequest request)
     {
-        var result = await _productService.UpdateAsync(request.ToModel());
+        var result = await _productService.UpdateAsync(request.ToModel(id));
+
+        if (result.Success)
+        {
+            return NoContent();
+        }
+
+        return result.ErrorReason == ResultErrorReason.NotFound ? NotFound() : BadRequest(result.Errors);
+    }
+
+    [HttpPatch("{id}/quantity")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(Dictionary<string, string>), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult> Post([FromRoute] int id, [FromBody] UpdateProductQuantityRequest request)
+    {
+        var result = await _productService.UpdateQuantityAsync(id, request.Quantity);
 
         if (result.Success)
         {

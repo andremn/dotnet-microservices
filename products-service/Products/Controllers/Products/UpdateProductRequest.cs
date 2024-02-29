@@ -1,3 +1,3 @@
 ﻿namespace Products.Controllers.Products;
 
-public record UpdateProductRequest(int Id, string Name, string Description, int Quantity, decimal Price);
+public record UpdateProductRequest(string Name, string Description, int Quantity, decimal Price);
