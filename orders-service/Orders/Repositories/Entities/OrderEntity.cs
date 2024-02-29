@@ -12,6 +12,8 @@ public class OrderEntity
 
     public decimal Price { get; set; }
 
+    public int Quantity { get; set; }
+
     public OrderStatus Status { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

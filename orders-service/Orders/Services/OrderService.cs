@@ -58,13 +58,13 @@ public class OrderService(
         return GetDetailedOrderResult.ProductNotFound();
     }
 
-    public async Task<CreateOrderResult> CreateAsync(int productId)
+    public async Task<CreateOrderResult> CreateAsync(int productId, int quantity)
     {
         var getProductResponse = await productService.GetByIdAsync(productId, _loggedUser.Authorization);
 
         if (getProductResponse.IsSuccessStatusCode && getProductResponse.Content is Product product)
         {
-            var order = new Order(Id: 0, productId, _loggedUser.Id, product.Price, OrderStatus.Created, DateTime.UtcNow);
+            var order = new Order(Id: 0, productId, _loggedUser.Id, product.Price, quantity, OrderStatus.Created, DateTime.UtcNow);
 
             order = await orderRepository.CreateAsync(order);
 

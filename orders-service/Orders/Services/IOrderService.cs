@@ -8,7 +8,7 @@ public interface IOrderService
 
     Task<GetDetailedOrderResult> GetByIdAsync(int id);
 
-    Task<CreateOrderResult> CreateAsync(int productId);
+    Task<CreateOrderResult> CreateAsync(int productId, int quantity);
 
     Task<UpdateOrderResult> UpdateAsync(Order order);
 }

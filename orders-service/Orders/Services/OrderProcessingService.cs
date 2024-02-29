@@ -9,11 +9,15 @@ namespace Orders.Services;
 public class OrderProcessingService(
     IPaymentService paymentService,
     IShippingService shippingService,
+    IProductService productService,
+    ILoggedUserService loggedUserService,
     IPublisher<OrderChangeMessage> orderChangePublisher,
     IOrderRepository orderRepository,
     ILogger<OrderProcessingService> logger
 ) : IOrderProcessingService
 {
+    private readonly LoggedUser _loggedUser = loggedUserService.GetLoggedUser();
+
     public async Task HandlePaymentChangedAsync(int orderId, bool approved)
     {
         var existingOrder = await orderRepository.GetByIdAsync(orderId);
@@ -69,9 +73,25 @@ public class OrderProcessingService(
 
         if (order.Status is OrderStatus.Created)
         {
-            await paymentService.SendApprovalRequestAsync(order);
+            var request = new UpdateProductQuantityRequest(order.Quantity, UpdateProductQuantityOperation.Decrement);
+            var updateProductResponse = await productService.UpdateQuantityAsync(order.ProductId, request, _loggedUser.Authorization);
 
-            newStatus = OrderStatus.AwaitingPayment;
+            if (updateProductResponse.IsSuccessStatusCode)
+            {
+                await paymentService.SendApprovalRequestAsync(order);
+                newStatus = OrderStatus.AwaitingPayment;
+            }
+            else
+            {
+                logger.LogWarning(
+                    "Cannot process order '{orderId}' as there was an error when updating the quantity for product '{productId}'. Status code = {statusCode}",
+                    order.Id,
+                    order.ProductId,
+                    updateProductResponse.StatusCode);
+
+                newStatus = OrderStatus.Canceled;
+            }
+
         }
         else if (order.Status is OrderStatus.PaymentConfirmed)
         {

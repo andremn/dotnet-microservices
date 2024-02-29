@@ -37,7 +37,7 @@ public class OrdersController(IOrderService orderService) : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult> Post([FromBody] PostRequest request)
     {
-        var result = await orderService.CreateAsync(request.ProductId);
+        var result = await orderService.CreateAsync(request.ProductId, request.Quantity);
 
         if (result.IsSuccess)
         {
