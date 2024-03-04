@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Orders.Model;
-using Orders.Services;
-using Orders.Services.Results;
+using Orders.Services.Orders;
 
 namespace Orders.Controllers.Orders;
 
@@ -34,20 +33,20 @@ public class OrdersController(IOrderService orderService) : ControllerBase
     }
 
     [HttpPost]
-    [ProducesResponseType(typeof(PostResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(CreateOrderResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> Post([FromBody] PostRequest request)
+    public async Task<ActionResult<CreateOrderResponse>> Post([FromBody] CreateOrderRequest request)
     {
         var result = await orderService.CreateAsync(request.ProductId, request.Quantity);
 
         if (result.IsSuccess)
         {
-            var response = new PostResponse(result.Id);
+            var response = new CreateOrderResponse(result.Id);
 
             return CreatedAtAction(nameof(GetById), response, response);
         }
 
-        return result.ErrorReason == ResultErrorReason.ProductNotFound ? NotFound() : BadRequest();
+        return NotFound();
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Orders.Extensions;
 using Orders.Messaging.Messages;
-using Orders.Services;
+using Orders.Services.Orders;
 
 namespace Orders.Messaging.Consumers.Listeners;
 

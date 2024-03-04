@@ -1,7 +1,7 @@
 ﻿using Orders.Model;
 using Refit;
 
-namespace Orders.Services;
+namespace Orders.Services.External;
 
 public interface IProductService
 {

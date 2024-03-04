@@ -1,5 +1,5 @@
 ﻿using Orders.Messaging.Messages;
-using Orders.Services;
+using Orders.Services.External;
 
 namespace Orders.Messaging.Consumers.Listeners;
 

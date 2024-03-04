@@ -1,7 +1,7 @@
 ﻿using Orders.Model;
 using Orders.Services.Results;
 
-namespace Orders.Services;
+namespace Orders.Services.Orders;
 public interface IOrderService
 {
     Task<IList<Order>> GetAllAsync();
@@ -9,6 +9,4 @@ public interface IOrderService
     Task<Order?> GetByIdAsync(int id);
 
     Task<CreateOrderResult> CreateAsync(int productId, int quantity);
-
-    Task<UpdateOrderResult> UpdateAsync(Order order);
 }

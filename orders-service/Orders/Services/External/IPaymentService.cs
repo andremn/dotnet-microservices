@@ -1,6 +1,6 @@
 ﻿using Orders.Model;
 
-namespace Orders.Services;
+namespace Orders.Services.External;
 
 public interface IPaymentService
 {

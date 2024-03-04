@@ -1,11 +1,8 @@
-﻿using Orders.Extensions;
-using Orders.Messaging.Messages;
-using Orders.Messaging.Producers.Publishers;
-using Orders.Model;
+﻿using Orders.Model;
 using Orders.Repositories;
-using System.Net;
+using Orders.Services.External;
 
-namespace Orders.Services;
+namespace Orders.Services.Orders;
 
 public class OrderProcessingService(
     IPaymentService paymentService,

@@ -1,17 +1,20 @@
-﻿using Orders.Extensions;
+﻿using Orders.Common;
+using Orders.Extensions;
 using Orders.Messaging.Messages;
 using Orders.Messaging.Producers.Publishers;
 using Orders.Model;
 using Orders.Repositories;
+using Orders.Services.External;
 using Orders.Services.Results;
 
-namespace Orders.Services;
+namespace Orders.Services.Orders;
 
 public class OrderService(
     IPublisher<OrderCreatedMessage> orderChangePublisher,
     IProductService productService,
     ILoggedUserService loggedUserService,
-    IOrderRepository orderRepository
+    IOrderRepository orderRepository,
+    IDateTimeProvider dateTimeProvider
 ) : IOrderService
 {
     private readonly LoggedUser _loggedUser = loggedUserService.GetLoggedUser();
@@ -35,7 +38,7 @@ public class OrderService(
         if (updateProductResponse.IsSuccessStatusCode && updateProductResponse.Content is Product product)
         {
             var productSnapshot = new ProductSnapshot(Id: 0, product.Name, product.Price);
-            var order = new Order(Id: 0, product.Id, _loggedUser.Id, productSnapshot, quantity, OrderStatus.Created, DateTime.UtcNow);
+            var order = new Order(Id: 0, product.Id, _loggedUser.Id, productSnapshot, quantity, OrderStatus.Created, dateTimeProvider.UtcNow);
 
             order = await orderRepository.CreateAsync(order);
 
@@ -45,24 +48,5 @@ public class OrderService(
         }
 
         return CreateOrderResult.ProductNotFound();
-    }
-
-    public async Task<UpdateOrderResult> UpdateAsync(Order order)
-    {
-        var existingOrder = await orderRepository.GetByIdAsync(order.Id);
-
-        if (existingOrder is null)
-        {
-            return UpdateOrderResult.NotFound();
-        }
-
-        if (existingOrder.ProductSnapshot.Id != order.ProductSnapshot.Id)
-        {
-            return UpdateOrderResult.CannotUpdateProduct();
-        }
-
-        await orderRepository.UpdateAsync(order);
-
-        return UpdateOrderResult.Success(order.Id);
     }
 }

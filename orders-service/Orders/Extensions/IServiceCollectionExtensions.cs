@@ -1,4 +1,5 @@
-﻿using Orders.Messaging;
+﻿using Orders.Common;
+using Orders.Messaging;
 using Orders.Messaging.Consumers;
 using Orders.Messaging.Consumers.Listeners;
 using Orders.Messaging.Messages;
@@ -6,6 +7,8 @@ using Orders.Messaging.Producers;
 using Orders.Messaging.Producers.Publishers;
 using Orders.Repositories;
 using Orders.Services;
+using Orders.Services.External;
+using Orders.Services.Orders;
 using Refit;
 
 namespace Orders.Extensions;
@@ -14,6 +17,8 @@ public static class IServiceCollectionExtensions
 {
     public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
+
         services.AddScoped<ILoggedUserService, LoggedUserService>();
 
         services.AddScoped<IOrderRepository, OrderRepository>();

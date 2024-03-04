@@ -3,7 +3,7 @@
 namespace Orders.Repositories;
 public interface IOrderRepository
 {
-    Task<IList<Order>> GetAllByUserAsync(string userEmail);
+    Task<IList<Order>> GetAllByUserAsync(string userId);
 
     Task<Order?> GetByIdAsync(int id);
 

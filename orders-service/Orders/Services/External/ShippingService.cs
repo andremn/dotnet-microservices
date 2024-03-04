@@ -3,7 +3,7 @@ using Orders.Messaging.Messages;
 using Orders.Messaging.Producers.Publishers;
 using Orders.Model;
 
-namespace Orders.Services;
+namespace Orders.Services.External;
 
 public class ShippingService(
     IPublisher<OrderShippingRequestMessage> shippingRequestPublisher,
