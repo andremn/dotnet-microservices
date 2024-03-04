@@ -188,7 +188,7 @@ public class ProductServiceTests
         // Assert
         actualResult.Should().BeEquivalentTo(expectedResult);
 
-        _productRepositoryMock.Verify(x => x.UpdateAsync(productToUpdate), Times.Once);
+        _productRepositoryMock.Verify(x => x.IncrementQuantityAsync(productToUpdate), Times.Once);
     }
 
     [Fact]

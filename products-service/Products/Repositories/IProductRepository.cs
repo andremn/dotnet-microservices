@@ -13,5 +13,7 @@ public interface IProductRepository
 
     Task UpdateAsync(Product product);
 
+    Task<bool> UpdateQuantityAsync(int id, int quantity);
+
     Task DeleteAsync(Product product);
 }

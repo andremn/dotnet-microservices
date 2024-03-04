@@ -74,9 +74,10 @@ public class ProductsController(IProductService productService) : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(Dictionary<string, string>), StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult> Post([FromRoute] int id, [FromBody] UpdateProductQuantityRequest request)
+    public async Task<ActionResult> Patch([FromRoute] int id, [FromBody] UpdateProductQuantityRequest request)
     {
-        var result = await _productService.UpdateQuantityAsync(id, request.Quantity);
+        var quantity = request.Operation == UpdateProductQuantityOperation.Increment ? request.Quantity : -request.Quantity;
+        var result = await _productService.UpdateQuantityAsync(id, quantity);
 
         if (result.Success)
         {

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Products.Extensions;
 using Products.Model;
+using System.Data;
 
 namespace Products.Repositories;
 
@@ -48,6 +49,15 @@ public class ProductRepository(ProductsDbContext dbContext) : IProductRepository
         _dbContext.Products.Update(entity);
 
         await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task<bool> UpdateQuantityAsync(int id, int quantity)
+    {
+        var updatedProducts = await _dbContext.Products
+            .Where(x => x.Id == id)
+            .ExecuteUpdateAsync(s => s.SetProperty(p => p.Quantity, v => v.Quantity + quantity));
+
+        return updatedProducts > 0;
     }
 
     public async Task DeleteAsync(Product product)

@@ -43,7 +43,7 @@ public class ProductService(
 
     public async Task<UpdateProductResult> UpdateAsync(Product product)
     {
-        if (await _productRepository.GetByIdAsync(product.Id) == null)
+        if (await _productRepository.GetByIdAsync(product.Id) is null)
         {
             return UpdateProductResult.FromNotFoundError();
         }
@@ -69,17 +69,25 @@ public class ProductService(
             return UpdateProductResult.FromNotFoundError();
         }
 
-        var productToUpdate = existingProduct with { Quantity = quantity };
-        var validationResult = _productValidator.Validate(productToUpdate);
-
-        if (validationResult.IsValid)
+        if (existingProduct.Quantity + quantity < 0)
         {
-            await _productRepository.UpdateAsync(productToUpdate);
+            var errors = new List<ValidationFailure>
+            {
+                new(nameof(quantity), $"'{nameof(quantity)}' to decrement cannot be greater than the current product quantity")
+            };
 
-            return UpdateProductResult.FromSuccess();
+
+            return UpdateProductResult.FromValidationError(ConvertValidationFailureToDictionary(errors));
         }
 
-        return UpdateProductResult.FromValidationError(ConvertValidationFailureToDictionary(validationResult.Errors));
+        var productFound = await _productRepository.UpdateQuantityAsync(id, quantity);
+
+        if (!productFound)
+        {
+            return UpdateProductResult.FromNotFoundError();
+        }
+
+        return UpdateProductResult.FromSuccess();
     }
 
     public async Task<DeleteProductResult> DeleteByIdAsync(int id)
