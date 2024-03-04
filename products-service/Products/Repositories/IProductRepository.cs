@@ -7,13 +7,11 @@ public interface IProductRepository
 
     Task<IList<Product>> GetAllAsync();
 
-    Task<IList<Product>> GetAllByIdsAsync(IEnumerable<int> ids);
-
     Task<Product?> GetByIdAsync(int id);
 
-    Task UpdateAsync(Product product);
+    Task<Product?> UpdateAsync(Product product);
 
-    Task<bool> UpdateQuantityAsync(int id, int quantity);
+    Task IncrementQuantityAsync(int id, int quantity);
 
     Task DeleteAsync(Product product);
 }

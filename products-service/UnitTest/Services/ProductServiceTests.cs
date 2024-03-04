@@ -169,7 +169,7 @@ public class ProductServiceTests
             Price: 14.98m);
 
         var productToUpdate = new Product(
-            Id: 121,
+            Id: 10,
             Name: "Keyboard",
             Description: "Keyboard with RGB lights",
             Quantity: 110,
@@ -178,7 +178,10 @@ public class ProductServiceTests
         _productRepositoryMock.Setup(x => x.GetByIdAsync(productToUpdate.Id))
             .ReturnsAsync(existingProduct);
 
-        var expectedResult = new UpdateProductResult(true, ResultErrorReason.None, new Dictionary<string, string>(0));
+        _productRepositoryMock.Setup(x => x.UpdateAsync(productToUpdate))
+            .ReturnsAsync(productToUpdate);
+
+        var expectedResult = new UpdateProductResult(true, productToUpdate, ResultErrorReason.None, new Dictionary<string, string>(0));
 
         _productValidatorMock.Setup(x => x.Validate(productToUpdate)).Returns(new ValidationResult());
 
@@ -187,8 +190,6 @@ public class ProductServiceTests
 
         // Assert
         actualResult.Should().BeEquivalentTo(expectedResult);
-
-        _productRepositoryMock.Verify(x => x.IncrementQuantityAsync(productToUpdate), Times.Once);
     }
 
     [Fact]
@@ -221,7 +222,7 @@ public class ProductServiceTests
 
         var validationResult = new ValidationResult(expectedErrors.Select(x => new ValidationFailure(x.Key, x.Value)));
 
-        var expectedResult = new UpdateProductResult(false, ResultErrorReason.Validation, expectedErrors);
+        var expectedResult = new UpdateProductResult(false, null, ResultErrorReason.Validation, expectedErrors);
 
         _productValidatorMock.Setup(x => x.Validate(productToUpdate)).Returns(validationResult);
 
@@ -238,7 +239,7 @@ public class ProductServiceTests
         // Arrange
         var productToUpdate = new Product(
             Id: 10,
-            Name: "",
+            Name: "Keyboard",
             Description: "Keyboard with RGB lights",
             Quantity: -110,
             Price: -55.99m);
@@ -250,13 +251,116 @@ public class ProductServiceTests
             ["quantity"] = "'Quantity' must be greater than or equal to 0",
         };
 
-        var expectedResult = new UpdateProductResult(false, ResultErrorReason.NotFound, new Dictionary<string, string>(0));
+        var expectedResult = new UpdateProductResult(false, null, ResultErrorReason.NotFound, new Dictionary<string, string>(0));
+
+        _productRepositoryMock.Setup(x => x.UpdateAsync(productToUpdate))
+            .ReturnsAsync((Product?)null);
+
+        _productValidatorMock.Setup(x => x.Validate(productToUpdate))
+            .Returns(new ValidationResult());
+
+        // Act
+        var actualResult = await _productService.UpdateAsync(productToUpdate);
+
+        // Assert
+        actualResult.Should().BeEquivalentTo(expectedResult);
+    }
+
+    [Theory]
+    [InlineData(-89)]
+    [InlineData(0)]
+    [InlineData(89)]
+    [InlineData(1000)]
+    public async Task IncrementQuantityAsync_ValidQuantity_ReturnsSuccess(int quantity)
+    {
+        // Arrange
+        var existingProduct = new Product(
+            Id: 10,
+            Name: "Keyboard",
+            Description: "Keyboard with RGB lights",
+            Quantity: 89,
+            Price: 14.98m);
+
+        var productToUpdate = new Product(
+            Id: 10,
+            Name: "Keyboard",
+            Description: "Keyboard with RGB lights",
+            Quantity: existingProduct.Quantity + quantity,
+            Price: 14.98m);
+
+        _productRepositoryMock.Setup(x => x.GetByIdAsync(productToUpdate.Id))
+            .ReturnsAsync(existingProduct);
+
+        var expectedResult = new UpdateProductResult(true, productToUpdate, ResultErrorReason.None, new Dictionary<string, string>(0));
+
+        // Act
+        var actualResult = await _productService.IncrementQuantityAsync(existingProduct.Id, quantity);
+
+        // Assert
+        actualResult.Should().BeEquivalentTo(expectedResult);
+    }
+
+    [Theory]
+    [InlineData(-111)]
+    [InlineData(-200)]
+    public async Task IncrementQuantityAsync_InvalidQuantity_ReturnsErrorWithValidationReasonAndErrorMessages(int quantity)
+    {
+        // Arrange
+        var existingProduct = new Product(
+            Id: 10,
+            Name: "Keyboard",
+            Description: "Keyboard with RGB lights",
+            Quantity: 110,
+            Price: 55.99m);
+
+        var expectedErrors = new Dictionary<string, string>
+        {
+            ["quantity"] = $"'quantity' to decrement cannot be greater than the current product quantity",
+        };
+
+        _productRepositoryMock.Setup(x => x.GetByIdAsync(existingProduct.Id))
+            .ReturnsAsync(existingProduct);
+
+        var validationResult = new ValidationResult(expectedErrors.Select(x => new ValidationFailure(x.Key, x.Value)));
+
+        var expectedResult = new UpdateProductResult(false, null, ResultErrorReason.Validation, expectedErrors);
+
+        // Act
+        var actualResult = await _productService.IncrementQuantityAsync(existingProduct.Id, quantity);
+
+        // Assert
+        actualResult.Should().BeEquivalentTo(expectedResult);
+    }
+
+    [Fact]
+    public async Task IncrementQuantityAsync_NotFoundProduct_ReturnsErrorWithNotFoundReason()
+    {
+        // Arrange
+        var quantity = 1;
+        var productToUpdate = new Product(
+            Id: 10,
+            Name: "Keyboard",
+            Description: "Keyboard with RGB lights",
+            Quantity: -110,
+            Price: -55.99m);
+
+        var expectedErrors = new Dictionary<string, string>
+        {
+            ["name"] = "'Name' must be non-empty",
+            ["price"] = "'Price' must be greater than or equal to 0",
+            ["quantity"] = "'Quantity' must be greater than or equal to 0",
+        };
+
+        var expectedResult = new UpdateProductResult(false, null, ResultErrorReason.NotFound, new Dictionary<string, string>(0));
 
         _productRepositoryMock.Setup(x => x.GetByIdAsync(productToUpdate.Id))
             .ReturnsAsync((Product?)null);
 
+        _productValidatorMock.Setup(x => x.Validate(productToUpdate))
+            .Returns(new ValidationResult());
+
         // Act
-        var actualResult = await _productService.UpdateAsync(productToUpdate);
+        var actualResult = await _productService.IncrementQuantityAsync(productToUpdate.Id, quantity);
 
         // Assert
         actualResult.Should().BeEquivalentTo(expectedResult);

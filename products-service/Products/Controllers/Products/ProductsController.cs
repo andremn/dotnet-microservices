@@ -17,8 +17,8 @@ public class ProductsController(IProductService productService) : ControllerBase
 
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<Product>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<IEnumerable<Product>>> Get([FromQuery] IEnumerable<int> ids) =>
-        Ok(await _productService.GetAllAsync(ids));
+    public async Task<ActionResult<IEnumerable<Product>>> Get() =>
+        Ok(await _productService.GetAllAsync());
 
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(Product), StatusCodes.Status200OK)]
@@ -53,38 +53,46 @@ public class ProductsController(IProductService productService) : ControllerBase
     }
 
     [HttpPut("{id}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(Product), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(Dictionary<string, string>), StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult> Put([FromRoute] int id, [FromBody] UpdateProductRequest request)
+    public async Task<ActionResult<Product>> Put([FromRoute] int id, [FromBody] UpdateProductRequest request)
     {
         var result = await _productService.UpdateAsync(request.ToModel(id));
 
         if (result.Success)
         {
-            return NoContent();
+            return Ok(result.Product);
         }
 
         return result.ErrorReason == ResultErrorReason.NotFound ? NotFound() : BadRequest(result.Errors);
     }
 
     [HttpPatch("{id}/quantity")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(Product), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(Dictionary<string, string>), StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult> Patch([FromRoute] int id, [FromBody] UpdateProductQuantityRequest request)
+    public async Task<ActionResult<Product>> Patch([FromRoute] int id, [FromBody] UpdateProductQuantityRequest request)
     {
-        var quantity = request.Operation == UpdateProductQuantityOperation.Increment ? request.Quantity : -request.Quantity;
-        var result = await _productService.UpdateQuantityAsync(id, quantity);
-
-        if (result.Success)
+        if (Enum.TryParse<UpdateProductQuantityOperation>(request.Operation, ignoreCase: true, out var operation))
         {
-            return NoContent();
+            var quantity = operation == UpdateProductQuantityOperation.Increment ? request.Quantity : -request.Quantity;
+            var result = await _productService.IncrementQuantityAsync(id, quantity);
+
+            if (result.Success)
+            {
+                return Ok(result.Product);
+            }
+
+            return result.ErrorReason == ResultErrorReason.NotFound ? NotFound() : BadRequest(result.Errors);
         }
 
-        return result.ErrorReason == ResultErrorReason.NotFound ? NotFound() : BadRequest(result.Errors);
+        return BadRequest(new Dictionary<string, string>
+        {
+            [nameof(request.Operation)] = $"Invalid operation '{request.Operation}'"
+        });
     }
 
     [HttpDelete("{id}")]

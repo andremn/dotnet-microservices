@@ -154,25 +154,29 @@ public class ProductsControllerTests
     }
 
     [Fact]
-    public async Task Put_ExistingAndValidProduct_Returns204NoContent()
+    public async Task Put_ExistingAndValidProduct_Returns200Ok()
     {
         // Arrange
-        var updateProductRequest = new UpdateProductRequest(Id: 52, Name: "CPU", Description: "Run all games", Quantity: 22, Price: 999.00m);
-        var product = new Product(
-            Id: updateProductRequest.Id,
+        var productId = 52;
+        var updateProductRequest = new UpdateProductRequest(Name: "CPU", Description: "Run all games", Quantity: 22, Price: 999.00m);
+        var expectedProduct = new Product(
+            productId,
             updateProductRequest.Name,
             updateProductRequest.Description,
             updateProductRequest.Quantity,
             updateProductRequest.Price);
 
-        _productServiceMock.Setup(x => x.UpdateAsync(product))
-            .ReturnsAsync(UpdateProductResult.FromSuccess());
+        _productServiceMock.Setup(x => x.UpdateAsync(expectedProduct))
+            .ReturnsAsync(new UpdateProductResult(true, expectedProduct, ResultErrorReason.None, new Dictionary<string, string>(0)));
 
         // Act
-        var result = await _productsController.Put(updateProductRequest);
+        var result = await _productsController.Put(productId, updateProductRequest);
 
         // Assert
-        result.As<NoContentResult>().StatusCode.Should().Be(StatusCodes.Status204NoContent);
+        var okResult = result.Result.As<OkObjectResult>();
+
+        okResult.StatusCode.Should().Be(StatusCodes.Status200OK);
+        okResult.Value.As<Product>().Should().BeEquivalentTo(expectedProduct);
     }
 
     [Fact]
@@ -180,23 +184,24 @@ public class ProductsControllerTests
     {
         // Arrange
         var invalidId = 212;
-        var updateProductRequest = new UpdateProductRequest(Id: invalidId, Name: "CPU", Description: "Run all games", Quantity: 22, Price: 999.00m);
+        var updateProductRequest = new UpdateProductRequest(Name: "CPU", Description: "Run all games", Quantity: 22, Price: 999.00m);
 
         _productServiceMock.Setup(x => x.UpdateAsync(It.Is<Product>(y => y.Id == invalidId)))
-            .ReturnsAsync(UpdateProductResult.FromNotFoundError());
+            .ReturnsAsync(new UpdateProductResult(false, null, ResultErrorReason.NotFound, new Dictionary<string, string>(0)));
 
         // Act
-        var result = await _productsController.Put(updateProductRequest);
+        var result = await _productsController.Put(invalidId, updateProductRequest);
 
         // Assert
-        result.As<NotFoundResult>().StatusCode.Should().Be(StatusCodes.Status404NotFound);
+        result.Result.As<NotFoundResult>().StatusCode.Should().Be(StatusCodes.Status404NotFound);
     }
 
     [Fact]
     public async Task Put_InvalidProduct_Returns400BadRequestWithErrors()
     {
         // Arrange
-        var updateProductRequest = new UpdateProductRequest(Id: 11, Name: "", Description: "", Quantity: -22, Price: -999.00m);
+        var productId = 11;
+        var updateProductRequest = new UpdateProductRequest(Name: "", Description: "", Quantity: -22, Price: -999.00m);
 
         var expectedErrors = new Dictionary<string, string>
         {
@@ -206,13 +211,111 @@ public class ProductsControllerTests
         };
 
         _productServiceMock.Setup(x => x.UpdateAsync(It.IsAny<Product>()))
-            .ReturnsAsync(UpdateProductResult.FromValidationError(expectedErrors));
+            .ReturnsAsync(new UpdateProductResult(false, null, ResultErrorReason.Validation, expectedErrors));
 
         // Act
-        var result = await _productsController.Put(updateProductRequest);
+        var result = await _productsController.Put(productId, updateProductRequest);
 
         // Assert
-        var badRequestResult = result.As<BadRequestObjectResult>();
+        var badRequestResult = result.Result.As<BadRequestObjectResult>();
+
+        badRequestResult.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+        badRequestResult.Value.As<Dictionary<string, string>>().Should().BeEquivalentTo(expectedErrors);
+    }
+
+    [Theory]
+    [InlineData(UpdateProductQuantityOperation.Increment)]
+    [InlineData(UpdateProductQuantityOperation.Decrement)]
+    public async Task Patch_ExistingProduct_Returns200Ok(UpdateProductQuantityOperation operation)
+    {
+        // Arrange
+        var productId = 52;
+        var quantity = 151;
+        var updateProductQuantityRequest = new UpdateProductQuantityRequest(quantity, operation.ToString());
+        var expectedProduct = new Product(productId, Name: "CPU", Description: "Run all games", Quantity: 22, Price: 999.00m);
+        var expectedQuantity = operation == UpdateProductQuantityOperation.Increment ? quantity : -quantity;
+
+        _productServiceMock.Setup(x => x.IncrementQuantityAsync(productId, expectedQuantity))
+            .ReturnsAsync(new UpdateProductResult(true, expectedProduct, ResultErrorReason.None, new Dictionary<string, string>(0)));
+
+        // Act
+        var result = await _productsController.Patch(productId, updateProductQuantityRequest);
+
+        // Assert
+        var okResult = result.Result.As<OkObjectResult>();
+
+        okResult.StatusCode.Should().Be(StatusCodes.Status200OK);
+        okResult.Value.As<Product>().Should().BeEquivalentTo(expectedProduct);
+    }
+
+    [Fact]
+    public async Task Patch_NonExistingProduct_Returns404NotFound()
+    {
+        // Arrange
+        var invalidId = 212;
+        var expectedQuantity = 151;
+        var updateProductQuantityRequest = new UpdateProductQuantityRequest(expectedQuantity, UpdateProductQuantityOperation.Increment.ToString());
+        var updateProductRequest = new UpdateProductRequest(Name: "CPU", Description: "Run all games", Quantity: 22, Price: 999.00m);
+
+        _productServiceMock.Setup(x => x.IncrementQuantityAsync(invalidId, expectedQuantity))
+            .ReturnsAsync(new UpdateProductResult(false, null, ResultErrorReason.NotFound, new Dictionary<string, string>(0)));
+
+        // Act
+        var result = await _productsController.Patch(invalidId, updateProductQuantityRequest);
+
+        // Assert
+        result.Result.As<NotFoundResult>().StatusCode.Should().Be(StatusCodes.Status404NotFound);
+    }
+
+    [Fact]
+    public async Task Patch_InvalidProduct_Returns400BadRequestWithErrors()
+    {
+        // Arrange
+        var productId = 11;
+        var expectedQuantity = 151;
+        var updateProductQuantityRequest = new UpdateProductQuantityRequest(expectedQuantity, UpdateProductQuantityOperation.Increment.ToString());
+        var updateProductRequest = new UpdateProductRequest(Name: "", Description: "", Quantity: -22, Price: -999.00m);
+
+        var expectedErrors = new Dictionary<string, string>
+        {
+            ["quantity"] = "'Quantity' must be greater than or equal to 0",
+        };
+
+        _productServiceMock.Setup(x => x.IncrementQuantityAsync(productId, expectedQuantity))
+            .ReturnsAsync(new UpdateProductResult(false, null, ResultErrorReason.Validation, expectedErrors));
+
+        // Act
+        var result = await _productsController.Patch(productId, updateProductQuantityRequest);
+
+        // Assert
+        var badRequestResult = result.Result.As<BadRequestObjectResult>();
+
+        badRequestResult.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+        badRequestResult.Value.As<Dictionary<string, string>>().Should().BeEquivalentTo(expectedErrors);
+    }
+
+    [Fact]
+    public async Task Patch_InvalidOperation_Returns400BadRequestWithErrors()
+    {
+        // Arrange
+        var productId = 11;
+        var expectedQuantity = 151;
+        var updateProductQuantityRequest = new UpdateProductQuantityRequest(expectedQuantity, "invalid");
+        var updateProductRequest = new UpdateProductRequest(Name: "", Description: "", Quantity: -22, Price: -999.00m);
+
+        var expectedErrors = new Dictionary<string, string>
+        {
+            ["Operation"] = $"Invalid operation '{updateProductQuantityRequest.Operation}'",
+        };
+
+        _productServiceMock.Setup(x => x.IncrementQuantityAsync(productId, expectedQuantity))
+            .ReturnsAsync(new UpdateProductResult(false, null, ResultErrorReason.Validation, expectedErrors));
+
+        // Act
+        var result = await _productsController.Patch(productId, updateProductQuantityRequest);
+
+        // Assert
+        var badRequestResult = result.Result.As<BadRequestObjectResult>();
 
         badRequestResult.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
         badRequestResult.Value.As<Dictionary<string, string>>().Should().BeEquivalentTo(expectedErrors);

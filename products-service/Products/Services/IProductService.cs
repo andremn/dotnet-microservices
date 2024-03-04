@@ -5,7 +5,7 @@ namespace Products.Services;
 
 public interface IProductService
 {
-    Task<IList<Product>> GetAllAsync(IEnumerable<int> ids);
+    Task<IList<Product>> GetAllAsync();
 
     Task<Product?> FindByIdAsync(int id);
 
@@ -13,7 +13,7 @@ public interface IProductService
 
     Task<UpdateProductResult> UpdateAsync(Product product);
 
-    Task<UpdateProductResult> UpdateQuantityAsync(int id, int quantity);
+    Task<UpdateProductResult> IncrementQuantityAsync(int id, int quantity);
 
     Task<DeleteProductResult> DeleteByIdAsync(int id);
 }

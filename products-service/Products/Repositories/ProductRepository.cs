@@ -15,13 +15,6 @@ public class ProductRepository(ProductsDbContext dbContext) : IProductRepository
         .Select(x => x.ToModel())
         .ToListAsync();
 
-    public async Task<IList<Product>> GetAllByIdsAsync(IEnumerable<int> ids) =>
-        await _dbContext.Products
-        .AsNoTracking()
-        .Where(x => ids.Any(y => y == x.Id))
-        .Select(x => x.ToModel())
-        .ToListAsync();
-
     public async Task<Product?> GetByIdAsync(int id)
     {
         var entity = await _dbContext.Products
@@ -42,22 +35,29 @@ public class ProductRepository(ProductsDbContext dbContext) : IProductRepository
         return product with { Id = entity.Id };
     }
 
-    public async Task UpdateAsync(Product product)
+    public async Task<Product?> UpdateAsync(Product product)
     {
-        var entity = product.ToEntity();
+        var entity = await GetByIdAsync(product.Id);
 
-        _dbContext.Products.Update(entity);
+        if (entity is null)
+        {
+            return null;
+        }
+
+        var entityToUpdate = product.ToEntity();
+
+        _dbContext.Products.Update(entityToUpdate);
 
         await _dbContext.SaveChangesAsync();
+
+        return entity;
     }
 
-    public async Task<bool> UpdateQuantityAsync(int id, int quantity)
+    public async Task IncrementQuantityAsync(int id, int quantity)
     {
-        var updatedProducts = await _dbContext.Products
+        await _dbContext.Products
             .Where(x => x.Id == id)
             .ExecuteUpdateAsync(s => s.SetProperty(p => p.Quantity, v => v.Quantity + quantity));
-
-        return updatedProducts > 0;
     }
 
     public async Task DeleteAsync(Product product)

@@ -1,6 +1,6 @@
 ﻿namespace Products.Controllers.Products;
 
-public record UpdateProductQuantityRequest(int Quantity, UpdateProductQuantityOperation Operation);
+public record UpdateProductQuantityRequest(int Quantity, string Operation);
 
 public enum UpdateProductQuantityOperation
 {

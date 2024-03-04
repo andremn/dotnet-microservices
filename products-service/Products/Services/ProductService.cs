@@ -14,15 +14,8 @@ public class ProductService(
     private readonly IProductRepository _productRepository = productRepository;
     private readonly IValidator<Product> _productValidator = productValidator;
 
-    public async Task<IList<Product>> GetAllAsync(IEnumerable<int> ids)
-    {
-        if (ids.Any())
-        {
-            return await _productRepository.GetAllByIdsAsync(ids);
-        }
-
-        return await _productRepository.GetAllAsync();
-    }
+    public async Task<IList<Product>> GetAllAsync() =>
+        await _productRepository.GetAllAsync();
 
     public async Task<Product?> FindByIdAsync(int id) =>
         await _productRepository.GetByIdAsync(id);
@@ -43,24 +36,24 @@ public class ProductService(
 
     public async Task<UpdateProductResult> UpdateAsync(Product product)
     {
-        if (await _productRepository.GetByIdAsync(product.Id) is null)
-        {
-            return UpdateProductResult.FromNotFoundError();
-        }
-
         var validationResult = _productValidator.Validate(product);
 
         if (validationResult.IsValid)
         {
-            await _productRepository.UpdateAsync(product);
+            var updatedProduct = await _productRepository.UpdateAsync(product);
 
-            return UpdateProductResult.FromSuccess();
+            if (updatedProduct is null)
+            {
+                return UpdateProductResult.FromNotFoundError();
+            }
+
+            return UpdateProductResult.FromSuccess(updatedProduct);
         }
 
         return UpdateProductResult.FromValidationError(ConvertValidationFailureToDictionary(validationResult.Errors));
     }
 
-    public async Task<UpdateProductResult> UpdateQuantityAsync(int id, int quantity)
+    public async Task<UpdateProductResult> IncrementQuantityAsync(int id, int quantity)
     {
         var existingProduct = await _productRepository.GetByIdAsync(id);
 
@@ -80,14 +73,9 @@ public class ProductService(
             return UpdateProductResult.FromValidationError(ConvertValidationFailureToDictionary(errors));
         }
 
-        var productFound = await _productRepository.UpdateQuantityAsync(id, quantity);
+        await _productRepository.IncrementQuantityAsync(id, quantity);
 
-        if (!productFound)
-        {
-            return UpdateProductResult.FromNotFoundError();
-        }
-
-        return UpdateProductResult.FromSuccess();
+        return UpdateProductResult.FromSuccess(existingProduct with { Quantity = existingProduct.Quantity + quantity });
     }
 
     public async Task<DeleteProductResult> DeleteByIdAsync(int id)
