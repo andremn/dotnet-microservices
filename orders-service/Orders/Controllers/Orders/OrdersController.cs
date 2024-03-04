@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Orders.Model;
 using Orders.Services;
+using Orders.Services.Results;
 
 namespace Orders.Controllers.Orders;
 
@@ -12,28 +13,29 @@ namespace Orders.Controllers.Orders;
 public class OrdersController(IOrderService orderService) : ControllerBase
 {
     [HttpGet]
-    [ProducesResponseType(typeof(IList<DetailedOrder>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<DetailedOrder>> Get()
+    [ProducesResponseType(typeof(IList<Order>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<Order>> Get()
     {
         return Ok(await orderService.GetAllAsync());
     }
 
     [HttpGet("{id}")]
-    [ProducesResponseType(typeof(DetailedOrder), StatusCodes.Status200OK)]
-    public async Task<ActionResult<DetailedOrder>> GetById([FromRoute] int id)
+    [ProducesResponseType(typeof(Order), StatusCodes.Status200OK)]
+    public async Task<ActionResult<Order>> GetById([FromRoute] int id)
     {
-        var result = await orderService.GetByIdAsync(id);
+        var order = await orderService.GetByIdAsync(id);
 
-        if (result.Order is null)
+        if (order is null)
         {
             return NotFound();
         }
 
-        return Ok(result.Order);
+        return Ok(order);
     }
 
     [HttpPost]
-    [ProducesResponseType(typeof(IList<DetailedOrder>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PostResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult> Post([FromBody] PostRequest request)
     {
@@ -46,6 +48,6 @@ public class OrdersController(IOrderService orderService) : ControllerBase
             return CreatedAtAction(nameof(GetById), response, response);
         }
 
-        return NotFound();
+        return result.ErrorReason == ResultErrorReason.ProductNotFound ? NotFound() : BadRequest();
     }
 }

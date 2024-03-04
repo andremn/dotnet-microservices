@@ -30,11 +30,24 @@ public static class IServiceCollectionExtensions
             .ConfigureHttpClient(c => c.BaseAddress = new Uri(productsServiceAddress));
 
         services.AddSingleton<IRabbitMqService, RabbitMqService>();
-        services.AddSingleton<IRabbitMqConsumerService, RabbitMqOrdersConsumerService>();
         services.AddSingleton<IRabbitMqProducerService, RabbitMqProducerService>();
+        services.AddSingleton<IRabbitMqConsumerStarter, RabbitMqOrderCreatedConsumerStarter>();
+        services.AddSingleton<IRabbitMqConsumerStarter, RabbitMqOrderPaymentStatusChangedConsumerStarter>();
+        services.AddSingleton<IRabbitMqConsumerStarter, RabbitMqOrderPaymentRequestConsumerStarter>();
+        services.AddSingleton<IRabbitMqConsumerStarter, RabbitMqOrderShippingStatusChangedConsumerStarter>();
+        services.AddSingleton<IRabbitMqConsumerStarter, RabbitMqOrderShippingRequestConsumerStarter>();
 
-        services.AddTransient<IListener<OrderChangeMessage>, OrderChangeMessageListener>();
-        services.AddTransient<IPublisher<OrderChangeMessage>, OrderChangeMessagePublisher>();
+        services.AddTransient<IListener<OrderCreatedMessage>, OrderCreatedMessageListener>();
+        services.AddTransient<IListener<OrderPaymentStatusChangedMessage>, OrderPaymentStatusChangedListener>();
+        services.AddTransient<IListener<OrderPaymentRequestMessage>, OrderPaymentRequestListener>();
+        services.AddTransient<IListener<OrderShippingStatusChangedMessage>, OrderShippingStatusChangedListener>();
+        services.AddTransient<IListener<OrderShippingRequestMessage>, OrderShippingRequestListener>();
+
+        services.AddScoped<IPublisher<OrderCreatedMessage>, OrderCreatedPublisher>();
+        services.AddScoped<IPublisher<OrderPaymentRequestMessage>, OrderPaymentRequestPublisher>();
+        services.AddScoped<IPublisher<OrderShippingRequestMessage>, OrderShippingRequestPublisher>();
+        services.AddScoped<IPublisher<OrderPaymentStatusChangedMessage>, OrderPaymentStatusChangedPublisher>();
+        services.AddScoped<IPublisher<OrderShippingStatusChangedMessage>, OrderShippingStatusChangedPublisher>();
 
         return services;
     }

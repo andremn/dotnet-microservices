@@ -8,22 +8,21 @@ public record RabbitMqConfig
 
     public string Password { get; set; } = string.Empty;
 
-    public RabbitMqConsumerConfig OrderChangeConsumer { get; set; } = new RabbitMqConsumerConfig();
+    public RabbitMqMessageConfig OrderCreated { get; set; } = new RabbitMqMessageConfig();
 
-    public RabbitMqProducerConfig OrderChangeProducer { get; set; } = new RabbitMqProducerConfig();
+    public RabbitMqMessageConfig OrderPaymentStatusChanged { get; set; } = new RabbitMqMessageConfig();
 
-    public record RabbitMqConsumerConfig
+    public RabbitMqMessageConfig OrderShippingStatusChanged { get; set; } = new RabbitMqMessageConfig();
+
+    public RabbitMqMessageConfig OrderPaymentRequest { get; set; } = new RabbitMqMessageConfig();
+
+    public RabbitMqMessageConfig OrderShippingRequest { get; set; } = new RabbitMqMessageConfig();
+
+    public record RabbitMqMessageConfig
     {
         public string Exchange { get; set; } = string.Empty;
 
         public string Queue { get; set; } = string.Empty;
-
-        public string RoutingKey { get; set; } = string.Empty;
-    }
-
-    public record RabbitMqProducerConfig
-    {
-        public string Exchange { get; set; } = string.Empty;
 
         public string RoutingKey { get; set; } = string.Empty;
     }

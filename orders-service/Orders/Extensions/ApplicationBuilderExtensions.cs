@@ -6,7 +6,7 @@ public static class ApplicationBuilderExtensions
 {
     public static IApplicationBuilder UseRabbitMqConsumers(this IApplicationBuilder applicationBuilder)
     {
-        var consumers = applicationBuilder.ApplicationServices.GetServices<IRabbitMqConsumerService>();
+        var consumers = applicationBuilder.ApplicationServices.GetServices<IRabbitMqConsumerStarter>();
         var applicationLifetime = applicationBuilder.ApplicationServices.GetRequiredService<IHostApplicationLifetime>();
 
         applicationLifetime.ApplicationStarted.Register(() =>

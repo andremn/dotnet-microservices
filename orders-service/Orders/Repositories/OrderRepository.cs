@@ -9,6 +9,7 @@ public class OrderRepository(OrdersDbContext dbContext) : IOrderRepository
     public async Task<IList<Order>> GetAllByUserAsync(string userId) =>
         await dbContext.Orders
         .AsNoTracking()
+        .Include(x => x.ProductSnapshot)
         .Where(x => x.UserId == userId)
         .Select(x => x.ToModel())
         .ToListAsync();
@@ -17,6 +18,7 @@ public class OrderRepository(OrdersDbContext dbContext) : IOrderRepository
     {
         var entity = await dbContext.Orders
         .AsNoTracking()
+        .Include(x => x.ProductSnapshot)
         .SingleOrDefaultAsync(x => x.Id == id);
 
         return entity?.ToModel();
@@ -30,7 +32,7 @@ public class OrderRepository(OrdersDbContext dbContext) : IOrderRepository
 
         await dbContext.SaveChangesAsync();
 
-        return order with { Id = entity.Id };
+        return order with { Id = entity.Id, ProductSnapshot = entity.ProductSnapshot.ToModel() };
     }
 
     public async Task<Order> UpdateAsync(Order order)

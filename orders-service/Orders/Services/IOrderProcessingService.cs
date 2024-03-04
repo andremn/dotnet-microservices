@@ -3,11 +3,9 @@
 namespace Orders.Services;
 public interface IOrderProcessingService
 {
-    Task HandleDeliverStatusChangedAsync(int orderId, bool delivered);
+    Task HandleOrderCreatedAsync(Order order);
 
-    Task HandleOrderChangedAsync(Order order);
+    Task HandlePaymentStatusChangedAsync(int orderId, OrderPaymentStatus status);
 
-    Task HandlePaymentChangedAsync(int orderId, bool approved);
-
-    Task HandleShippingStartedAsync(int orderId);
+    Task HandleShippingStatusChangedAsync(int orderId, OrderShippingStatus status);
 }

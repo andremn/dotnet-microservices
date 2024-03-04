@@ -1,6 +1,6 @@
 ﻿namespace Orders.Messaging.Consumers;
 
-public interface IRabbitMqConsumerService : IDisposable
+public interface IRabbitMqConsumerStarter : IDisposable
 {
     void StartReceivingMessages();
 }

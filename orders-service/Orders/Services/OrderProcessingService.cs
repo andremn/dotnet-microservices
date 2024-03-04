@@ -3,22 +3,27 @@ using Orders.Messaging.Messages;
 using Orders.Messaging.Producers.Publishers;
 using Orders.Model;
 using Orders.Repositories;
+using System.Net;
 
 namespace Orders.Services;
 
 public class OrderProcessingService(
     IPaymentService paymentService,
     IShippingService shippingService,
-    IProductService productService,
-    ILoggedUserService loggedUserService,
-    IPublisher<OrderChangeMessage> orderChangePublisher,
     IOrderRepository orderRepository,
     ILogger<OrderProcessingService> logger
 ) : IOrderProcessingService
 {
-    private readonly LoggedUser _loggedUser = loggedUserService.GetLoggedUser();
+    public async Task HandleOrderCreatedAsync(Order order)
+    {
+        await paymentService.SendApprovalRequestAsync(order);
 
-    public async Task HandlePaymentChangedAsync(int orderId, bool approved)
+        var updatedOrder = order with { Status = OrderStatus.AwaitingPayment };
+
+        await orderRepository.UpdateAsync(updatedOrder);
+    }
+
+    public async Task HandlePaymentStatusChangedAsync(int orderId, OrderPaymentStatus status)
     {
         var existingOrder = await orderRepository.GetByIdAsync(orderId);
 
@@ -28,13 +33,20 @@ public class OrderProcessingService(
             return;
         }
 
-        var newStatus = approved ? OrderStatus.PaymentConfirmed : OrderStatus.PaymentDenied;
+        var newStatus = status switch
+        {
+            OrderPaymentStatus.AwaitingApproval => OrderStatus.AwaitingPayment,
+            OrderPaymentStatus.Approved => OrderStatus.PaymentConfirmed,
+            OrderPaymentStatus.Denied => OrderStatus.PaymentDenied,
+            _ => existingOrder.Status
+        };
+
         var updatedOrder = await UpdateOrderStatusAsync(existingOrder, newStatus);
 
-        PublishOrderChangeMessage(updatedOrder);
+        await shippingService.RequestOrderShippingAsync(updatedOrder);
     }
 
-    public async Task HandleShippingStartedAsync(int orderId)
+    public async Task HandleShippingStatusChangedAsync(int orderId, OrderShippingStatus status)
     {
         var existingOrder = await orderRepository.GetByIdAsync(orderId);
 
@@ -44,68 +56,17 @@ public class OrderProcessingService(
             return;
         }
 
-        var updatedOrder = await UpdateOrderStatusAsync(existingOrder, OrderStatus.Shipped);
-
-        PublishOrderChangeMessage(updatedOrder);
-    }
-
-    public async Task HandleDeliverStatusChangedAsync(int orderId, bool delivered)
-    {
-        var existingOrder = await orderRepository.GetByIdAsync(orderId);
-
-        if (existingOrder is null)
+        var orderStatus = status switch
         {
-            logger.LogWarning("Deliver status changed, but order with id '{orderId}' was not found", orderId);
-            return;
-        }
+            OrderShippingStatus.AwaitingCollect => OrderStatus.AwaitingShipping,
+            OrderShippingStatus.Collected => OrderStatus.Shipped,
+            OrderShippingStatus.EnRoute => OrderStatus.Shipped,
+            OrderShippingStatus.Delivered => OrderStatus.Finished,
+            OrderShippingStatus.NotDelivered => OrderStatus.DeliveryFailed,
+            _ => existingOrder.Status
+        };
 
-        var newStatus = delivered ? OrderStatus.Finished : OrderStatus.DeliveryFailed;
-        var updatedOrder = await UpdateOrderStatusAsync(existingOrder, newStatus);
-
-        PublishOrderChangeMessage(updatedOrder);
-    }
-
-    public async Task HandleOrderChangedAsync(Order order)
-    {
-        logger.LogDebug("Order '{orderId}' changed: {order}", order.Id, order);
-
-        var newStatus = order.Status;
-
-        if (order.Status is OrderStatus.Created)
-        {
-            var request = new UpdateProductQuantityRequest(order.Quantity, UpdateProductQuantityOperation.Decrement);
-            var updateProductResponse = await productService.UpdateQuantityAsync(order.ProductId, request, _loggedUser.Authorization);
-
-            if (updateProductResponse.IsSuccessStatusCode)
-            {
-                await paymentService.SendApprovalRequestAsync(order);
-                newStatus = OrderStatus.AwaitingPayment;
-            }
-            else
-            {
-                logger.LogWarning(
-                    "Cannot process order '{orderId}' as there was an error when updating the quantity for product '{productId}'. Status code = {statusCode}",
-                    order.Id,
-                    order.ProductId,
-                    updateProductResponse.StatusCode);
-
-                newStatus = OrderStatus.Canceled;
-            }
-
-        }
-        else if (order.Status is OrderStatus.PaymentConfirmed)
-        {
-            await shippingService.RequestOrderShippingAsync(order);
-
-            newStatus = OrderStatus.AwaitingShipping;
-        }
-
-        if (order.Status != newStatus)
-        {
-            var updatedOrder = order with { Status = newStatus };
-
-            await orderRepository.UpdateAsync(updatedOrder);
-        }
+        await UpdateOrderStatusAsync(existingOrder, orderStatus);
     }
 
     private async Task<Order> UpdateOrderStatusAsync(Order order, OrderStatus newStatus)
@@ -116,7 +77,4 @@ public class OrderProcessingService(
 
         return updatedOrder;
     }
-
-    private void PublishOrderChangeMessage(Order order) =>
-        orderChangePublisher.Publish(order.ToChangeMessage());
 }

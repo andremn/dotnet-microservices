@@ -4,9 +4,9 @@ using Orders.Services.Results;
 namespace Orders.Services;
 public interface IOrderService
 {
-    Task<IList<DetailedOrder>> GetAllAsync();
+    Task<IList<Order>> GetAllAsync();
 
-    Task<GetDetailedOrderResult> GetByIdAsync(int id);
+    Task<Order?> GetByIdAsync(int id);
 
     Task<CreateOrderResult> CreateAsync(int productId, int quantity);
 

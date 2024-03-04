@@ -8,7 +8,7 @@ using Orders.Services.Results;
 namespace Orders.Services;
 
 public class OrderService(
-    IPublisher<OrderChangeMessage> orderChangePublisher,
+    IPublisher<OrderCreatedMessage> orderChangePublisher,
     IProductService productService,
     ILoggedUserService loggedUserService,
     IOrderRepository orderRepository
@@ -16,59 +16,30 @@ public class OrderService(
 {
     private readonly LoggedUser _loggedUser = loggedUserService.GetLoggedUser();
 
-    public async Task<IList<DetailedOrder>> GetAllAsync()
+    public async Task<IList<Order>> GetAllAsync()
     {
         var currentUser = loggedUserService.GetLoggedUser();
         var orders = await orderRepository.GetAllByUserAsync(currentUser.Id);
-        var products = await productService.GetAllByIdsAsync(orders.Select(x => x.ProductId), currentUser.Authorization);
-        var productsById = new Dictionary<int, Product>();
-        var detailedOrders = new List<DetailedOrder>(orders.Count);
 
-        foreach (var order in orders)
-        {
-            if (!productsById.TryGetValue(order.ProductId, out var product))
-            {
-                product = products.Single(x => x.Id == order.ProductId);
-                productsById[product.Id] = product;
-            }
-
-            detailedOrders.Add(CreateDetailedOrder(order, product));
-        }
-
-        return detailedOrders;
+        return orders;
     }
 
-    public async Task<GetDetailedOrderResult> GetByIdAsync(int id)
-    {
-        var order = await orderRepository.GetByIdAsync(id);
-        var currentUser = loggedUserService.GetLoggedUser();
-
-        if (order is null)
-        {
-            return GetDetailedOrderResult.NotFound();
-        }
-
-        var response = await productService.GetByIdAsync(order.ProductId, currentUser.Authorization);
-
-        if (response.IsSuccessStatusCode)
-        {
-            return GetDetailedOrderResult.CreateAsSuccess(CreateDetailedOrder(order, response.Content));
-        }
-
-        return GetDetailedOrderResult.ProductNotFound();
-    }
+    public async Task<Order?> GetByIdAsync(int id) =>
+        await orderRepository.GetByIdAsync(id);
 
     public async Task<CreateOrderResult> CreateAsync(int productId, int quantity)
     {
-        var getProductResponse = await productService.GetByIdAsync(productId, _loggedUser.Authorization);
+        var request = new UpdateProductQuantityRequest(quantity, UpdateProductQuantityOperation.Decrement);
+        var updateProductResponse = await productService.UpdateQuantityAsync(productId, request, _loggedUser.Authorization);
 
-        if (getProductResponse.IsSuccessStatusCode && getProductResponse.Content is Product product)
+        if (updateProductResponse.IsSuccessStatusCode && updateProductResponse.Content is Product product)
         {
-            var order = new Order(Id: 0, productId, _loggedUser.Id, product.Price, quantity, OrderStatus.Created, DateTime.UtcNow);
+            var productSnapshot = new ProductSnapshot(Id: 0, product.Name, product.Price);
+            var order = new Order(Id: 0, product.Id, _loggedUser.Id, productSnapshot, quantity, OrderStatus.Created, DateTime.UtcNow);
 
             order = await orderRepository.CreateAsync(order);
 
-            orderChangePublisher.Publish(order.ToChangeMessage());
+            orderChangePublisher.Publish(order.ToOrderCreatedMessage());
 
             return CreateOrderResult.Success(order.Id);
         }
@@ -85,7 +56,7 @@ public class OrderService(
             return UpdateOrderResult.NotFound();
         }
 
-        if (existingOrder.ProductId != order.ProductId)
+        if (existingOrder.ProductSnapshot.Id != order.ProductSnapshot.Id)
         {
             return UpdateOrderResult.CannotUpdateProduct();
         }
@@ -94,7 +65,4 @@ public class OrderService(
 
         return UpdateOrderResult.Success(order.Id);
     }
-
-    private static DetailedOrder CreateDetailedOrder(Order order, Product product) =>
-        new(order.Id, product, order.CreatedAt);
 }
