@@ -128,7 +128,7 @@ public class ProductsControllerTests
     }
 
     [Fact]
-    public async Task Post_InvalidProduct_Returns400badRequestWithErrors()
+    public async Task Post_InvalidProduct_Returns400BadRequestWithErrors()
     {
         // Arrange
         var createProductRequest = new CreateProductRequest(Name: "", Description: "", Quantity: -22, Price: -999.00m);
