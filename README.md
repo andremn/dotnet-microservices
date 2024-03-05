@@ -40,6 +40,7 @@ Quando todos os containers estiverem rodando, as APIs estarão disponíveis em:
 - orders-api: http://localhost:5156/swagger
 
 ## Exemplos de algumas requisições
+Com exeção dos endpoints de usuários (`/api/users*`), todas as chamadas devem ser feitas com um token de autorização, que pode ser obtido pelo endpoint `POST /api/users/login`. O token deve então ser passado pelo header da requisição: `Authorization: Bearer <token>`
 - Registrar um usuário: ```POST /api/users```
     - Requisição:
         ```
@@ -59,7 +60,7 @@ Quando todos os containers estiverem rodando, as APIs estarão disponíveis em:
             "password": "senha123"
         }
         ```
-- Logar um usuário: ```POST /api/users/login```
+- Logar um usuário: `POST /api/users/login`
     - Requisição:
         ```
         {
