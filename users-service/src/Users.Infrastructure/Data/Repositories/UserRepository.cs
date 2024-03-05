@@ -13,11 +13,18 @@ internal class UserRepository(
     private readonly UserManager<ApplicationUser> _userManager = userManager;
     private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
 
-    public async Task<bool> LoginAsync(string email, string password)
+    public async Task<User?> LoginAsync(string email, string password)
     {
-        var result = await _signInManager.PasswordSignInAsync(email, password, isPersistent: false, lockoutOnFailure: false);
+        var user = await _userManager.FindByEmailAsync(email);
 
-        return result.Succeeded;
+        if (user == null)
+        {
+            return null;
+        }
+
+        var result = await _signInManager.PasswordSignInAsync(user, password, isPersistent: false, lockoutOnFailure: false);
+
+        return result.Succeeded ? new User(user.Id, user.FirstName, user.LastName, email) : null;
     }
 
     public async Task<bool> CreateAsync(User user, string password)
@@ -33,17 +40,5 @@ internal class UserRepository(
         var createResult = await _userManager.CreateAsync(entity, password);
 
         return createResult.Succeeded;
-    }
-
-    public async Task<User?> FindByEmailAsync(string email)
-    {
-        var existingUser = await _userManager.FindByEmailAsync(email);
-
-        if (existingUser != null)
-        {
-            return new User(existingUser.Id, existingUser.FirstName, existingUser.LastName, email);
-        }
-
-        return null;
     }
 }

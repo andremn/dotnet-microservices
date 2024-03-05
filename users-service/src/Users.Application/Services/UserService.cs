@@ -11,22 +11,15 @@ public class UserService(IUserRepository userRepository) : IUserService
 
     public async Task<LoginUserResult> LoginAsync(string username, string password)
     {
-        var result = await _userRepository.LoginAsync(username, password);
+        var loggedUser = await _userRepository.LoginAsync(username, password);
 
-        return new LoginUserResult(result);
+        return new LoginUserResult(loggedUser);
     }
 
-    public async Task<CreateUserResult> CreateUserAsync(User user, string password)
+    public async Task<CreateUserResult> CreateAsync(User user, string password)
     {
         var result = await _userRepository.CreateAsync(user, password);
 
         return new CreateUserResult(result);
-    }
-
-    public async Task<GetUserResult> GetUserByEmailAsync(string email)
-    {
-        var user = await _userRepository.FindByEmailAsync(email);
-
-        return new GetUserResult(user);
     }
 }

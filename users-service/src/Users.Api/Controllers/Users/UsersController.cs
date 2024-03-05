@@ -20,11 +20,11 @@ public class UsersController(
     private readonly JwtConfiguration _jwtConfig = jwtConfigSnapshot.Value;
 
     [HttpPost]
-    public async Task<IActionResult> Post([FromBody] CreateUserRequest request)
+    public async Task<ActionResult<User>> Post([FromBody] CreateUserRequest request)
     {
         var user = new User(Id: string.Empty, request.FirstName, request.LastName, request.Email);
 
-        var createResult = await _userService.CreateUserAsync(user, request.Password);
+        var createResult = await _userService.CreateAsync(user, request.Password);
 
         if (!createResult.Success)
         {
@@ -35,24 +35,18 @@ public class UsersController(
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Post([FromBody] LoginRequest request)
+    public async Task<ActionResult<string>> Post([FromBody] LoginRequest request)
     {
         var loginResult = await _userService.LoginAsync(request.Email, request.Password);
 
-        if (!loginResult.Success)
+        if (loginResult.User is null)
         {
-            return BadRequest();
+            return Unauthorized();
         }
 
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtConfig.Key));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-        var getUserResult = await _userService.GetUserByEmailAsync(request.Email);
-        var user = getUserResult.User;
-
-        if (user is null)
-        {
-            return Forbid();
-        }
+        var user = loginResult.User;
 
         var claims = new List<Claim>
         {
