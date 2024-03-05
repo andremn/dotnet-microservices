@@ -17,7 +17,7 @@ internal class UserRepository(
     {
         var user = await _userManager.FindByEmailAsync(email);
 
-        if (user == null)
+        if (user is null)
         {
             return null;
         }
