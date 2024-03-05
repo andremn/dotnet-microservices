@@ -10,7 +10,6 @@ public static class IServiceCollectionExtensions
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
-        services.AddScoped<IUserService, UserService>();
         services.AddScoped<IProductService, ProductService>();
 
         services.AddValidatorsFromAssemblyContaining<ProductValidator>();

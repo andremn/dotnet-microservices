@@ -68,7 +68,6 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices();
 builder.Services.AddProductsDbContext(builder.Configuration.GetConnectionString("ProductsDb"));
-builder.Services.AddUsersDbContext(builder.Configuration.GetConnectionString("UserDb"));
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
