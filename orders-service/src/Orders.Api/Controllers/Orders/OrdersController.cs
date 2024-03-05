@@ -60,7 +60,6 @@ public class OrdersController(IOrderService orderService) : ControllerBase
     /// <response code="404">If the provided product does not exist or the quantity is not enough for this order request.</response>
     [HttpPost]
     [ProducesResponseType(typeof(CreateOrderResponse), StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<CreateOrderResponse>> Post([FromBody] CreateOrderRequest request)
     {
