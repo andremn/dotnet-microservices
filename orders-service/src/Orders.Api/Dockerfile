@@ -9,17 +9,20 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["./Orders.csproj", "Orders/"]
-RUN dotnet restore "./Orders/Orders.csproj"
-WORKDIR "/src/Orders"
-COPY . .
-RUN dotnet build "./Orders.csproj" -c $BUILD_CONFIGURATION -o /app/build
+COPY ["src/Orders.Api/Orders.Api.csproj", "Orders.Api/"]
+COPY ["src/Orders.Application/Orders.Application.csproj", "Orders.Application/"]
+COPY ["src/Orders.Domain/Orders.Domain.csproj", "Orders.Domain/"]
+COPY ["src/Orders.Infrastructure/Orders.Infrastructure.csproj", "Orders.Infrastructure/"]
+RUN dotnet restore "./Orders.Api/Orders.Api.csproj"
+COPY /src .
+WORKDIR "/src/Orders.Api"
+RUN dotnet build "./Orders.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./Orders.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./Orders.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Orders.dll"]
+ENTRYPOINT ["dotnet", "Orders.Api.dll"]

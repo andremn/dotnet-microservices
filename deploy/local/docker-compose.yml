@@ -11,7 +11,24 @@ services:
       - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
     networks:
       - apis-network
-    restart: unless-stopped
+    restart: unless-stopped    
+
+  users-api:
+    image: users-api-image
+    container_name: "users-api"
+    expose:
+      - "8080"
+    ports:
+      - 5154:8080
+    networks:
+      - apis-network
+    build:
+      context: ../../users-service
+      dockerfile: ./src/Users.Api/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=development
+    depends_on:
+      - rabbitmq
 
   products-api:
     image: products-api-image
@@ -19,10 +36,12 @@ services:
     expose:
       - "8080"
     ports:
-      - 5154:8080
+      - 5155:8080
     networks:
       - apis-network
-    build: ../../products-service/Products
+    build:
+      context: ../../products-service
+      dockerfile: ./src/Products.Api/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=development
     depends_on:
@@ -34,10 +53,12 @@ services:
     expose:
       - "8080"
     ports:
-      - 5155:8080
+      - 5156:8080
     networks:
       - apis-network
-    build: ../../orders-service/Orders
+    build:
+      context: ../../orders-service
+      dockerfile: ./src/Orders.Api/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=development
     depends_on:
