@@ -1,4 +1,4 @@
-version: "3.2"
+version: "3.4"
 services:
   rabbitmq:
     image: rabbitmq:3-management-alpine
@@ -10,9 +10,39 @@ services:
       - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
       - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
     networks:
-      - rabbitmq
+      - apis-network
     restart: unless-stopped
 
+  products-api:
+    image: products-api-image
+    container_name: "products-api"
+    expose:
+      - "8080"
+    ports:
+      - 5154:8080
+    networks:
+      - apis-network
+    build: ../../products-service/Products
+    environment:
+      - ASPNETCORE_ENVIRONMENT=development
+    depends_on:
+      - rabbitmq
+
+  orders-api:
+    image: orders-api-image
+    container_name: "orders-api"
+    expose:
+      - "8080"
+    ports:
+      - 5155:8080
+    networks:
+      - apis-network
+    build: ../../orders-service/Orders
+    environment:
+      - ASPNETCORE_ENVIRONMENT=development
+    depends_on:
+      - rabbitmq
+
 networks:
-  rabbitmq:
+  apis-network:
     driver: bridge
