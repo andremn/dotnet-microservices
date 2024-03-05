@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Orders.Api.Extensions;
+using Orders.Api.Services;
 using Orders.Application.Extensions;
 using Orders.Application.Messaging.Configurations;
 using Orders.Extensions;
@@ -73,11 +75,21 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddApiServices();
-builder.Services.AddApplicationServices(builder.Configuration);
+builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices();
 builder.Services.AddDbContext(builder.Configuration.GetConnectionString("OrdersDb"));
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddProductsServiceRefitClient(options =>
+{
+    var productsServiceAddress = builder.Configuration.GetSection("ProductsService:BaseAddress").Value
+        ?? throw new InvalidOperationException("Invalid address for the Products service");
+
+    options
+        .ConfigureHttpClient(c => c.BaseAddress = new Uri(productsServiceAddress))
+        .AddHttpMessageHandler<AuthorizationHeaderHandler>();
+});
 
 var app = builder.Build();
 
@@ -89,13 +101,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseLoggedUserProvider();
+
 app.UseRabbitMqConsumers();
 
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
-
-app.UseLoggedUserProvider();
 
 app.MapControllers();
 

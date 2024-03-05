@@ -148,7 +148,7 @@ public class OrderServiceTests
 
         _dateTimeProviderMock.SetupGet(x => x.UtcNow).Returns(dateTimeNow);
 
-        _productServiceMock.Setup(x => x.UpdateQuantityAsync(productId, updateProductQuantityRequest, _loggedUser.Authorization))
+        _productServiceMock.Setup(x => x.UpdateQuantityAsync(productId, updateProductQuantityRequest))
             .ReturnsAsync(new ApiResponse<ProductDto>(new HttpResponseMessage(HttpStatusCode.OK), expectedProduct, new RefitSettings()));
 
         _orderRepositoryMock.Setup(x => x.CreateAsync(expectedOrder))
@@ -191,7 +191,7 @@ public class OrderServiceTests
 
         _dateTimeProviderMock.SetupGet(x => x.UtcNow).Returns(dateTimeNow);
 
-        _productServiceMock.Setup(x => x.UpdateQuantityAsync(productId, updateProductQuantityRequest, _loggedUser.Authorization))
+        _productServiceMock.Setup(x => x.UpdateQuantityAsync(productId, updateProductQuantityRequest))
             .ReturnsAsync(new ApiResponse<ProductDto>(new HttpResponseMessage(HttpStatusCode.OK), expectedProduct, new RefitSettings()));
 
         _orderRepositoryMock.Setup(x => x.CreateAsync(expectedOrder))
@@ -214,7 +214,7 @@ public class OrderServiceTests
         var expectedProduct = new ProductDto(productId, "Keyboard", "RGB", quantity, Price: 15.99m);
         var expectedResult = new CreateOrderResult(false, 0, ResultErrorReason.ProductNotFound);
 
-        _productServiceMock.Setup(x => x.UpdateQuantityAsync(productId, updateProductQuantityRequest, _loggedUser.Authorization))
+        _productServiceMock.Setup(x => x.UpdateQuantityAsync(productId, updateProductQuantityRequest))
             .ReturnsAsync(new ApiResponse<ProductDto>(new HttpResponseMessage(HttpStatusCode.NotFound), null, new RefitSettings()));
 
         // Act

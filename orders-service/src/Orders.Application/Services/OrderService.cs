@@ -33,7 +33,7 @@ public class OrderService(
     public async Task<CreateOrderResult> CreateAsync(int productId, int quantity)
     {
         var request = new UpdateProductQuantityRequest(quantity, UpdateProductQuantityOperation.Decrement);
-        var updateProductResponse = await productService.UpdateQuantityAsync(productId, request, loggedUserProvider.LoggedUser.Authorization);
+        var updateProductResponse = await productService.UpdateQuantityAsync(productId, request);
 
         if (updateProductResponse.IsSuccessStatusCode && updateProductResponse.Content is ProductDto product)
         {

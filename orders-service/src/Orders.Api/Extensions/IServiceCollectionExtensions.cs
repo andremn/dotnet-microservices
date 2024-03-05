@@ -7,6 +7,8 @@ public static class IServiceCollectionExtensions
     public static IServiceCollection AddApiServices(this IServiceCollection services)
     {
         services.AddScoped<ILoggedUserService, LoggedUserService>();
+        
+        services.AddScoped<AuthorizationHeaderHandler>();
 
         return services;
     }

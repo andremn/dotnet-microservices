@@ -9,7 +9,7 @@ namespace Orders.Application.Extensions;
 
 public static class IServiceCollectionExtensions
 {
-    public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
 
@@ -21,11 +21,14 @@ public static class IServiceCollectionExtensions
         services.AddScoped<IPaymentService, PaymentService>();
         services.AddScoped<IShippingService, ShippingService>();
 
-        var productsServiceAddress = configuration.GetSection("ProductsService:BaseAddress").Value
-            ?? throw new InvalidOperationException("Invalid address for the Products service");
+        return services;
+    }
 
-        services.AddRefitClient<IProductService>()
-            .ConfigureHttpClient(c => c.BaseAddress = new Uri(productsServiceAddress));
+    public static IServiceCollection AddProductsServiceRefitClient(this IServiceCollection services, Action<IHttpClientBuilder> httpClientOptions)
+    {
+        var httpClientBuilder = services.AddRefitClient<IProductService>();
+
+        httpClientOptions(httpClientBuilder);
 
         return services;
     }
