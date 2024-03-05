@@ -39,8 +39,117 @@ Quando todos os containers estiverem rodando, as APIs estarão disponíveis em:
 - products-api: http://localhost:5155/swagger
 - orders-api: http://localhost:5156/swagger
 
-## Exemplos de requisições
-TBD
+## Exemplos de algumas requisições
+- Registrar um usuário: ```POST /api/users```
+    - Requisição:
+        ```
+        {
+            "firstName": "Nome",
+            "lastName": "Sobrenome",
+            "email": "user@mail.com",
+            "password": "senha123"
+        }
+        ```
+    - Resposta (sucesso):
+        ```
+        {
+            "firstName": "Nome",
+            "lastName": "Sobrenome",
+            "email": "user@mail.com",
+            "password": "senha123"
+        }
+        ```
+- Logar um usuário: ```POST /api/users/login```
+    - Requisição:
+        ```
+        {
+            "email": "user@mail.com",
+            "password": "senha123"
+        }
+        ```
+    - Resposta (sucesso): token de autenticação (JWT)
+- Registrar um produto: ```POST /api/products```
+    - Requisição:
+        ```
+        {
+            "name": "Mouse",
+            "description": "Sem fio e com RGB!",
+            "quantity": 121,
+            "price": 255.99
+        }
+        ```
+    - Resposta:
+        ```
+        {
+            "id": 1
+        }
+        ```
+- Registrar um pedido: ```POST /api/orders```
+    - Requisição:
+        ```
+        {
+            "productId": 1,
+            "quantity": 3
+        }
+        ```
+    - Resposta:
+        ```
+        {
+            "id": 1
+        }
+        ```
+- Listar todos os produtos: ```GET /api/products```
+    - Resposta:
+        ```
+        [
+            {
+                "id": 1,
+                "name": "Mouse",
+                "description": "Sem fio e com RGB!",
+                "quantity": 121
+                "price": 255.99
+            },
+            {
+                "id": 2,
+                "name": "Teclado",
+                "description": "Com fio e sem RGB...",
+                "quantity": 2
+                "price": 15.00
+            }
+        ]
+        ```
+- Listar todos os pedidos do usuário logado: ```GET /api/orders```
+    - Resposta:
+        ```
+        [
+            {
+                "id": 1,
+                "productId": 1,
+                "userId": "fef659d3-6946-40bd-aaf8-52df14497249",
+                "productSnapshot": {
+                    "id": 1,
+                    "name": "Mouse",
+                    "price": 225.99
+                },
+                "quantity": 3,
+                "status": 4,
+                "createdAt": "2024-03-01T20:32:21.385205Z"
+            },
+            {
+                "id": 1,
+                "productId": 1,
+                "userId": "fef659d3-6946-40bd-aaf8-52df14497249",
+                "productSnapshot": {
+                    "id": 2,
+                    "name": "Teclado",
+                    "price": 15.00
+                },
+                "quantity": 2,
+                "status": 4,
+                "createdAt": "2024-03-02T21:11:48.659874Z"
+            }
+        ]
+        ```
 
 ## Licença
 Este projeto está licenciado sob a MIT License.
