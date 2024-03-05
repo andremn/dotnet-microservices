@@ -11,8 +11,8 @@ services:
       - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
     networks:
       - apis-network
-    restart: unless-stopped    
-
+    restart: unless-stopped
+    
   postgres:
     image: postgres
     container_name: "postgres"
@@ -27,6 +27,7 @@ services:
     networks:
       - apis-network
     restart: unless-stopped
+
   users-api:
     image: users-api-image
     container_name: "users-api"
@@ -41,8 +42,10 @@ services:
       dockerfile: ./src/Users.Api/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=development
+      - ConnectionStrings__UsersDb=Host=postgres:5432;Database=users-db;Username=postgres;Password=admin
+      - Jwt__Key=jT0lgBkwaKmIjMuPdezwaorjhDl4UnYK
     depends_on:
-      - rabbitmq
+      - postgres
 
   products-api:
     image: products-api-image
@@ -58,8 +61,10 @@ services:
       dockerfile: ./src/Products.Api/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=development
+      - ConnectionStrings__ProductsDb=Host=postgres:5432;Database=products-db;Username=postgres;Password=admin
+      - Jwt__Key=jT0lgBkwaKmIjMuPdezwaorjhDl4UnYK
     depends_on:
-      - rabbitmq
+      - postgres
 
   orders-api:
     image: orders-api-image
@@ -75,9 +80,19 @@ services:
       dockerfile: ./src/Orders.Api/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=development
+      - ConnectionStrings__OrdersDb=Host=postgres:5432;Database=orders-db;Username=postgres;Password=admin
+      - Jwt__Key=jT0lgBkwaKmIjMuPdezwaorjhDl4UnYK
+      - RabbitMq__HostName=rabbitmq
+      - RabbitMq__UserName=guest
+      - RabbitMq__Password=guest
+      - ProductsService__BaseAddress=http://products-api:8080
     depends_on:
+      - postgres
       - rabbitmq
 
 networks:
   apis-network:
     driver: bridge
+
+volumes:
+  pg-data:
