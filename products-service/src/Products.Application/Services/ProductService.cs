@@ -58,7 +58,7 @@ public class ProductService(
     {
         var existingProduct = await _productRepository.GetByIdAsync(id);
 
-        if (existingProduct == null)
+        if (existingProduct is null)
         {
             return UpdateProductResult.FromNotFoundError();
         }
@@ -83,7 +83,7 @@ public class ProductService(
     {
         var existingProduct = await _productRepository.GetByIdAsync(id);
 
-        if (existingProduct == null)
+        if (existingProduct is null)
         {
             return DeleteProductResult.FromNotFoundError();
         }
