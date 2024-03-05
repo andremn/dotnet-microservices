@@ -4,47 +4,53 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Orders.Infrastructure.Data;
-
 
 #nullable disable
 
 namespace Orders.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(OrdersDbContext))]
-    [Migration("20240304190423_AddingProductSnapshotsTable")]
-    partial class AddingProductSnapshotsTable
+    [Migration("20240305202234_AddingOrdersAndProductSnapshotsTables")]
+    partial class AddingOrdersAndProductSnapshotsTables
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.2");
+            modelBuilder
+                .HasAnnotation("ProductVersion", "8.0.2")
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            modelBuilder.Entity("Orders.Repositories.Entities.OrderEntity", b =>
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("Orders.Infrastructure.Data.Entities.OrderEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("ProductId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<int>("ProductSnapshotId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Quantity")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Status")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -54,36 +60,38 @@ namespace Orders.Infrastructure.Data.Migrations
                     b.ToTable("Orders");
                 });
 
-            modelBuilder.Entity("Orders.Repositories.Entities.ProductSnapshotEntity", b =>
+            modelBuilder.Entity("Orders.Infrastructure.Data.Entities.ProductSnapshotEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<decimal>("Price")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("numeric");
 
                     b.HasKey("Id");
 
                     b.ToTable("ProductSnapshots");
                 });
 
-            modelBuilder.Entity("Orders.Repositories.Entities.OrderEntity", b =>
+            modelBuilder.Entity("Orders.Infrastructure.Data.Entities.OrderEntity", b =>
                 {
-                    b.HasOne("Orders.Repositories.Entities.ProductSnapshotEntity", "ProductSnapshot")
+                    b.HasOne("Orders.Infrastructure.Data.Entities.ProductSnapshotEntity", "ProductSnapshot")
                         .WithOne("Order")
-                        .HasForeignKey("Orders.Repositories.Entities.OrderEntity", "ProductSnapshotId")
+                        .HasForeignKey("Orders.Infrastructure.Data.Entities.OrderEntity", "ProductSnapshotId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("ProductSnapshot");
                 });
 
-            modelBuilder.Entity("Orders.Repositories.Entities.ProductSnapshotEntity", b =>
+            modelBuilder.Entity("Orders.Infrastructure.Data.Entities.ProductSnapshotEntity", b =>
                 {
                     b.Navigation("Order");
                 });

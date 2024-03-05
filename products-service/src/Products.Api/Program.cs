@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Products.Api.Configurations;
 using Products.Application.Extensions;
 using Products.Infrastructure.Extensions;
 using System.Text;
@@ -72,11 +71,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.Configure<JwtConfiguration>(builder.Configuration.GetSection("Jwt"));
-
 ValidatorOptions.Global.LanguageManager.Enabled = false;
 
 var app = builder.Build();
+
+app.UseExecuteMigrations();
 
 if (app.Environment.IsDevelopment())
 {

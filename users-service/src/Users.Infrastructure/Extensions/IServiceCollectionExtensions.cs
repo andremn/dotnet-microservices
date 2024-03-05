@@ -29,7 +29,7 @@ public static class IServiceCollectionExtensions
     public static IServiceCollection AddUsersDbContext(this IServiceCollection services, string? connectionString)
     {
         services.AddDbContext<UsersDbContext>(options =>
-            options.UseSqlite(connectionString));
+            options.UseNpgsql(connectionString));
 
         return services;
     }

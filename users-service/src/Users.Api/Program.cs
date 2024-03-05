@@ -7,13 +7,15 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices();
-builder.Services.AddUsersDbContext(builder.Configuration.GetConnectionString("UserDb"));
+builder.Services.AddUsersDbContext(builder.Configuration.GetConnectionString("UsersDb"));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.Configure<JwtConfiguration>(builder.Configuration.GetSection("Jwt"));
 
 var app = builder.Build();
+
+app.UseExecuteMigrations();
 
 if (app.Environment.IsDevelopment())
 {

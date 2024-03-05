@@ -77,6 +77,8 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+app.UseExecuteMigrations();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

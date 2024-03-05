@@ -18,7 +18,7 @@ public static class IServiceCollectionExtensions
     public static IServiceCollection AddProductsDbContext(this IServiceCollection services, string? connectionString)
     {
         services.AddDbContext<ProductsDbContext>(options =>
-            options.UseSqlite(connectionString));
+            options.UseNpgsql(connectionString));
 
         return services;
     }
