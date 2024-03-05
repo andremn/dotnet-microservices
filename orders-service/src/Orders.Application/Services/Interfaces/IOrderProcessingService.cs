@@ -1,11 +1,11 @@
 ﻿using Orders.Application.Enums;
-using Orders.Domain.Dtos;
+using Orders.Domain.Models;
 
 namespace Orders.Application.Services.Interfaces;
 
 public interface IOrderProcessingService
 {
-    Task HandleOrderCreatedAsync(OrderDto order);
+    Task HandleOrderCreatedAsync(Order order);
 
     Task HandlePaymentStatusChangedAsync(int orderId, OrderPaymentStatus status);
 

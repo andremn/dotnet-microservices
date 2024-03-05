@@ -1,8 +1,8 @@
 ﻿using Orders.Domain.Enums;
 
-namespace Orders.Domain.Entities;
+namespace Orders.Infrastructure.Data.Entities;
 
-public class Order
+public class OrderEntity
 {
     public int Id { get; set; }
 
@@ -18,5 +18,5 @@ public class Order
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    public ProductSnapshot ProductSnapshot { get; set; } = null!;
+    public ProductSnapshotEntity ProductSnapshot { get; set; } = null!;
 }

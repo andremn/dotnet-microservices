@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using Orders.Application.Enums;
 using Orders.Application.Services.Interfaces;
-using Orders.Domain.Dtos;
 using Orders.Domain.Enums;
+using Orders.Domain.Models;
 using Orders.Domain.Repositories;
 
 namespace Orders.Application.Services;
@@ -14,7 +14,7 @@ public class OrderProcessingService(
     ILogger<OrderProcessingService> logger
 ) : IOrderProcessingService
 {
-    public async Task HandleOrderCreatedAsync(OrderDto order)
+    public async Task HandleOrderCreatedAsync(Order order)
     {
         await paymentService.SendApprovalRequestAsync(order);
 
@@ -69,7 +69,7 @@ public class OrderProcessingService(
         await UpdateOrderStatusAsync(existingOrder, orderStatus);
     }
 
-    private async Task<OrderDto> UpdateOrderStatusAsync(OrderDto order, OrderStatus newStatus)
+    private async Task<Order> UpdateOrderStatusAsync(Order order, OrderStatus newStatus)
     {
         var updatedOrder = order with { Status = newStatus };
 

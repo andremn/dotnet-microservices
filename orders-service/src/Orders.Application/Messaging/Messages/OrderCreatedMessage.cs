@@ -1,5 +1,5 @@
-﻿using Orders.Domain.Dtos;
+﻿using Orders.Domain.Models;
 
 namespace Orders.Application.Messaging.Messages;
 
-public record OrderCreatedMessage(int Id, int ProductId, string UserId, ProductSnapshotDto ProductSnapshot, int Quantity, DateTime CreatedAt);
+public record OrderCreatedMessage(int Id, int ProductId, string UserId, ProductSnapshot ProductSnapshot, int Quantity, DateTime CreatedAt);

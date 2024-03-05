@@ -1,13 +1,13 @@
 ﻿using Orders.Application.Services.Results;
-using Orders.Domain.Dtos;
+using Orders.Domain.Models;
 
 namespace Orders.Application.Services.Interfaces;
 
 public interface IOrderService
 {
-    Task<IList<OrderDto>> GetAllAsync();
+    Task<IList<Order>> GetAllAsync();
 
-    Task<OrderDto?> GetByIdAsync(int id);
+    Task<Order?> GetByIdAsync(int id);
 
     Task<CreateOrderResult> CreateAsync(int productId, int quantity);
 }

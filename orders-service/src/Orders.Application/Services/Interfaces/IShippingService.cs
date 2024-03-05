@@ -1,10 +1,9 @@
-﻿using Orders.Domain.Dtos;
-
+﻿using Orders.Domain.Models;
 namespace Orders.Application.Services.Interfaces;
 
 public interface IShippingService
 {
-    Task RequestOrderShippingAsync(OrderDto order);
+    Task RequestOrderShippingAsync(Order order);
 
     Task HandleShippingRequestAsync(int orderId);
 }

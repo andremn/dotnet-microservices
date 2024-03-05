@@ -6,8 +6,8 @@ using Orders.Application.Enums;
 using Orders.Application.Services.Interfaces;
 using Orders.Application.Services.Results;
 using Orders.Controllers.Orders;
-using Orders.Domain.Dtos;
 using Orders.Domain.Enums;
+using Orders.Domain.Models;
 
 namespace Orders.Api.Tests.Controllers.Orders;
 
@@ -27,7 +27,7 @@ public class OrderControllerTests
     {
         // Arrange
         var utcNow = DateTime.UtcNow;
-        var orders = new List<OrderDto>
+        var orders = new List<Order>
         {
             new(Id: 1, ProductId: 14, UserId: "user-1", ProductSnapshot: new(Id: 1, "Mouse WiFi", 36.99m), Quantity: 56, Status: OrderStatus.Created, CreatedAt: utcNow.AddDays(-5)),
             new(Id: 2, ProductId: 14, UserId: "user-2", ProductSnapshot: new(Id: 2, "Keyboard Bluetooth", 55.00m), Quantity: 120, Status: OrderStatus.PaymentConfirmed, CreatedAt: utcNow.AddHours(-23)),
@@ -44,7 +44,7 @@ public class OrderControllerTests
         var okResult = result.Result.As<OkObjectResult>();
 
         okResult.StatusCode.Should().Be(StatusCodes.Status200OK);
-        okResult.Value.As<IEnumerable<OrderDto>>().Should().BeEquivalentTo(orders);
+        okResult.Value.As<IEnumerable<Order>>().Should().BeEquivalentTo(orders);
     }
 
     [Fact]
@@ -60,7 +60,7 @@ public class OrderControllerTests
         var okResult = result.Result.As<OkObjectResult>();
 
         okResult.StatusCode.Should().Be(StatusCodes.Status200OK);
-        okResult.Value.As<IEnumerable<OrderDto>>().Should().BeEmpty();
+        okResult.Value.As<IEnumerable<Order>>().Should().BeEmpty();
     }
 
     [Fact]
@@ -68,7 +68,7 @@ public class OrderControllerTests
     {
         // Arrange
         var utcNow = DateTime.UtcNow;
-        var orders = new List<OrderDto>
+        var orders = new List<Order>
         {
             new(Id: 1, ProductId: 14, UserId: "user-1", ProductSnapshot: new(Id: 1, "Mouse WiFi", 36.99m), Quantity: 56, Status: OrderStatus.Created, CreatedAt: utcNow.AddDays(-5)),
             new(Id: 2, ProductId: 14, UserId: "user-2", ProductSnapshot: new(Id: 2, "Keyboard Bluetooth", 55.00m), Quantity: 120, Status: OrderStatus.PaymentConfirmed, CreatedAt: utcNow.AddHours(-23)),
@@ -88,7 +88,7 @@ public class OrderControllerTests
         var okResult = result.Result.As<OkObjectResult>();
 
         okResult.StatusCode.Should().Be(StatusCodes.Status200OK);
-        okResult.Value.As<OrderDto>().Should().BeEquivalentTo(expectedOrder);
+        okResult.Value.As<Order>().Should().BeEquivalentTo(expectedOrder);
     }
 
     [Fact]
@@ -98,7 +98,7 @@ public class OrderControllerTests
         var invalidId = 100;
 
         _orderServiceMock.Setup(x => x.GetByIdAsync(invalidId))
-            .ReturnsAsync((OrderDto?)null);
+            .ReturnsAsync((Order?)null);
 
         // Act
         var result = await _ordersController.GetById(invalidId);

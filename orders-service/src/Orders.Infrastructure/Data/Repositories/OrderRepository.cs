@@ -1,31 +1,31 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Orders.Application.Mapping;
-using Orders.Domain.Dtos;
+using Orders.Domain.Models;
 using Orders.Domain.Repositories;
+using Orders.Infrastructure.Data.Mapping;
 
 namespace Orders.Infrastructure.Data.Repositories;
 
 public class OrderRepository(OrdersDbContext dbContext) : IOrderRepository
 {
-    public async Task<IList<OrderDto>> GetAllByUserAsync(string userId) =>
+    public async Task<IList<Order>> GetAllByUserAsync(string userId) =>
         await dbContext.Orders
         .AsNoTracking()
         .Include(x => x.ProductSnapshot)
         .Where(x => x.UserId == userId)
-        .Select(x => x.ToDto())
+        .Select(x => x.ToModel())
         .ToListAsync();
 
-    public async Task<OrderDto?> GetByIdAsync(int id)
+    public async Task<Order?> GetByIdAsync(int id)
     {
         var entity = await dbContext.Orders
-        .AsNoTracking()
-        .Include(x => x.ProductSnapshot)
-        .SingleOrDefaultAsync(x => x.Id == id);
+            .AsNoTracking()
+            .Include(x => x.ProductSnapshot)
+            .SingleOrDefaultAsync(x => x.Id == id);
 
-        return entity?.ToDto();
+        return entity?.ToModel();
     }
 
-    public async Task<OrderDto> CreateAsync(OrderDto order)
+    public async Task<Order> CreateAsync(Order order)
     {
         var entity = order.ToEntity();
 
@@ -33,10 +33,10 @@ public class OrderRepository(OrdersDbContext dbContext) : IOrderRepository
 
         await dbContext.SaveChangesAsync();
 
-        return order with { Id = entity.Id, ProductSnapshot = entity.ProductSnapshot.ToDto() };
+        return order with { Id = entity.Id, ProductSnapshot = entity.ProductSnapshot.ToModel() };
     }
 
-    public async Task<OrderDto> UpdateAsync(OrderDto order)
+    public async Task<Order> UpdateAsync(Order order)
     {
         var entity = order.ToEntity();
 

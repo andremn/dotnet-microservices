@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Orders.Application.Services.Interfaces;
-using Orders.Domain.Dtos;
+using Orders.Domain.Models;
 
 namespace Orders.Controllers.Orders;
 
@@ -12,15 +12,15 @@ namespace Orders.Controllers.Orders;
 public class OrdersController(IOrderService orderService) : ControllerBase
 {
     [HttpGet]
-    [ProducesResponseType(typeof(IList<OrderDto>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<OrderDto>> Get()
+    [ProducesResponseType(typeof(IList<Order>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<Order>> Get()
     {
         return Ok(await orderService.GetAllAsync());
     }
 
     [HttpGet("{id}")]
-    [ProducesResponseType(typeof(OrderDto), StatusCodes.Status200OK)]
-    public async Task<ActionResult<OrderDto>> GetById([FromRoute] int id)
+    [ProducesResponseType(typeof(Order), StatusCodes.Status200OK)]
+    public async Task<ActionResult<Order>> GetById([FromRoute] int id)
     {
         var order = await orderService.GetByIdAsync(id);
 

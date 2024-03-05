@@ -1,6 +1,6 @@
-﻿namespace Orders.Domain.Entities;
+﻿namespace Orders.Infrastructure.Data.Entities;
 
-public class ProductSnapshot
+public class ProductSnapshotEntity
 {
     public int Id { get; set; }
 
@@ -8,5 +8,5 @@ public class ProductSnapshot
 
     public decimal Price { get; set; }
 
-    public Order? Order { get; set; }
+    public OrderEntity? Order { get; set; }
 }

@@ -1,14 +1,14 @@
-﻿using Orders.Domain.Dtos;
+﻿using Orders.Domain.Models;
 
 namespace Orders.Domain.Repositories;
 
 public interface IOrderRepository
 {
-    Task<IList<OrderDto>> GetAllByUserAsync(string userId);
+    Task<IList<Order>> GetAllByUserAsync(string userId);
 
-    Task<OrderDto?> GetByIdAsync(int id);
+    Task<Order?> GetByIdAsync(int id);
 
-    Task<OrderDto> CreateAsync(OrderDto order);
+    Task<Order> CreateAsync(Order order);
 
-    Task<OrderDto> UpdateAsync(OrderDto order);
+    Task<Order> UpdateAsync(Order order);
 }

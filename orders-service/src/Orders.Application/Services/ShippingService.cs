@@ -4,7 +4,7 @@ using Orders.Application.Mapping;
 using Orders.Application.Messaging.Messages;
 using Orders.Application.Messaging.Publishers;
 using Orders.Application.Services.Interfaces;
-using Orders.Domain.Dtos;
+using Orders.Domain.Models;
 
 namespace Orders.Application.Services;
 
@@ -14,7 +14,7 @@ public class ShippingService(
     ILogger<ShippingService> logger
 ) : IShippingService
 {
-    public Task RequestOrderShippingAsync(OrderDto order)
+    public Task RequestOrderShippingAsync(Order order)
     {
         shippingRequestPublisher.Publish(order.ToOrderShippingRequestMessage());
 

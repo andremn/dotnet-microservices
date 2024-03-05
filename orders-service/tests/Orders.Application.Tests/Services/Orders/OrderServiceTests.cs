@@ -8,8 +8,8 @@ using Orders.Application.Messaging.Publishers;
 using Orders.Application.Services;
 using Orders.Application.Services.Interfaces;
 using Orders.Application.Services.Results;
-using Orders.Domain.Dtos;
 using Orders.Domain.Enums;
+using Orders.Domain.Models;
 using Orders.Domain.Repositories;
 using Refit;
 using System.Net;
@@ -51,7 +51,7 @@ public class OrderServiceTests
         // Arrange
         var loggedUser = new LoggedUserDto("user-1", "User", "Fake", "user@mail.com", string.Empty);
         var utcNow = DateTime.UtcNow;
-        var orders = new List<OrderDto>
+        var orders = new List<Order>
         {
             new(Id: 1, ProductId: 14, UserId: "user-1", ProductSnapshot: new(Id: 1, "Mouse WiFi", 36.99m), Quantity: 56, Status: OrderStatus.Created, CreatedAt: utcNow.AddDays(-5)),
             new(Id: 2, ProductId: 14, UserId: "user-2", ProductSnapshot: new(Id: 2, "Keyboard Bluetooth", 55.00m), Quantity: 120, Status: OrderStatus.PaymentConfirmed, CreatedAt: utcNow.AddHours(-23)),
@@ -90,7 +90,7 @@ public class OrderServiceTests
     {
         // Arrange
         var orderId = 23;
-        var expectedOrder = new OrderDto(
+        var expectedOrder = new Order(
             Id: 1,
             ProductId: 14,
             UserId: "user-1",
@@ -117,7 +117,7 @@ public class OrderServiceTests
         var orderId = 23;
 
         _orderRepositoryMock.Setup(x => x.GetByIdAsync(orderId))
-            .ReturnsAsync((OrderDto?)null);
+            .ReturnsAsync((Order?)null);
 
         // Act
         var actualOrder = await _orderService.GetByIdAsync(orderId);
@@ -137,7 +137,7 @@ public class OrderServiceTests
         var updateProductQuantityRequest = new UpdateProductQuantityRequest(quantity, UpdateProductQuantityOperation.Decrement);
         var expectedProduct = new ProductDto(productId, "Keyboard", "RGB", quantity, Price: 15.99m);
         var expectedResult = new CreateOrderResult(true, expectedOrderId, ResultErrorReason.None);
-        var expectedOrder = new OrderDto(
+        var expectedOrder = new Order(
             Id: 0,
             ProductId: productId,
             UserId: _loggedUser.Id,
@@ -172,7 +172,7 @@ public class OrderServiceTests
         var updateProductQuantityRequest = new UpdateProductQuantityRequest(quantity, UpdateProductQuantityOperation.Decrement);
         var expectedProduct = new ProductDto(productId, "Keyboard", "RGB", quantity, Price: 15.99m);
         var expectedResult = new CreateOrderResult(true, expectedOrderId, ResultErrorReason.None);
-        var expectedOrder = new OrderDto(
+        var expectedOrder = new Order(
             Id: 0,
             ProductId: productId,
             UserId: _loggedUser.Id,

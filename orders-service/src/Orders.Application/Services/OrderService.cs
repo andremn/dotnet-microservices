@@ -6,8 +6,8 @@ using Orders.Application.Messaging.Messages;
 using Orders.Application.Messaging.Publishers;
 using Orders.Application.Services.Interfaces;
 using Orders.Application.Services.Results;
-using Orders.Domain.Dtos;
 using Orders.Domain.Enums;
+using Orders.Domain.Models;
 using Orders.Domain.Repositories;
 
 namespace Orders.Application.Services;
@@ -20,14 +20,14 @@ public class OrderService(
     ILoggedUserProvider loggedUserProvider
 ) : IOrderService
 {
-    public async Task<IList<OrderDto>> GetAllAsync()
+    public async Task<IList<Order>> GetAllAsync()
     {
         var orders = await orderRepository.GetAllByUserAsync(loggedUserProvider.LoggedUser.Id);
 
         return orders;
     }
 
-    public async Task<OrderDto?> GetByIdAsync(int id) =>
+    public async Task<Order?> GetByIdAsync(int id) =>
         await orderRepository.GetByIdAsync(id);
 
     public async Task<CreateOrderResult> CreateAsync(int productId, int quantity)
@@ -37,8 +37,8 @@ public class OrderService(
 
         if (updateProductResponse.IsSuccessStatusCode && updateProductResponse.Content is ProductDto product)
         {
-            var productSnapshot = new ProductSnapshotDto(Id: 0, product.Name, product.Price);
-            var order = new OrderDto(
+            var productSnapshot = new ProductSnapshot(Id: 0, product.Name, product.Price);
+            var order = new Order(
                 Id: 0,
                 product.Id,
                 loggedUserProvider.LoggedUser.Id,

@@ -3,8 +3,8 @@ using Moq;
 using Orders.Application.Enums;
 using Orders.Application.Services;
 using Orders.Application.Services.Interfaces;
-using Orders.Domain.Dtos;
 using Orders.Domain.Enums;
+using Orders.Domain.Models;
 using Orders.Domain.Repositories;
 
 namespace Orders.Application.Tests.Services.Orders;
@@ -32,10 +32,10 @@ public class OrderProcessingServiceTests
     }
 
     [Fact]
-    public async Task HandleOrderCreatedAsync_CallsPaymentApprovelRequest()
+    public async Task HandleOrderCreatedAsync_CallsPaymentApprovalRequest()
     {
         // Arrange
-        var order = new OrderDto(
+        var order = new Order(
             Id: 33,
             ProductId: 132,
             UserId: "user-1",
@@ -55,7 +55,7 @@ public class OrderProcessingServiceTests
     public async Task HandleOrderCreatedAsync_UpdatesStatusToAwaitingPayment()
     {
         // Arrange
-        var order = new OrderDto(
+        var order = new Order(
             Id: 110,
             ProductId: 132,
             UserId: "user-1",
@@ -81,7 +81,7 @@ public class OrderProcessingServiceTests
     public async Task HandlePaymentStatusChangedAsync_OrderExists_UpdatesStatus(OrderPaymentStatus orderPaymentStatus)
     {
         // Arrange
-        var order = new OrderDto(
+        var order = new Order(
             Id: 10,
             ProductId: 132,
             UserId: "user-1",
@@ -119,7 +119,7 @@ public class OrderProcessingServiceTests
     public async Task HandlePaymentStatusChangedAsync_OrderExists_CallsRequestOrderShipping(OrderPaymentStatus orderPaymentStatus)
     {
         // Arrange
-        var order = new OrderDto(
+        var order = new Order(
             Id: 10,
             ProductId: 132,
             UserId: "user-1",
@@ -157,7 +157,7 @@ public class OrderProcessingServiceTests
     public async Task HandlePaymentStatusChangedAsync_OrderDoesNotExist_DoNotUpdateStatus(OrderPaymentStatus orderPaymentStatus)
     {
         // Arrange
-        var order = new OrderDto(
+        var order = new Order(
             Id: 10,
             ProductId: 132,
             UserId: "user-1",
@@ -178,7 +178,7 @@ public class OrderProcessingServiceTests
         };
 
         _orderRepositoryMock.Setup(x => x.GetByIdAsync(order.Id))
-            .ReturnsAsync((OrderDto?)null);
+            .ReturnsAsync((Order?)null);
 
         // Act
         await _orderProcessingService.HandlePaymentStatusChangedAsync(order.Id, orderPaymentStatus);
@@ -206,7 +206,7 @@ public class OrderProcessingServiceTests
     public async Task HandleShippingStatusChangedAsync_OrderExists_UpdatesStatus(OrderShippingStatus orderShippingStatus)
     {
         // Arrange
-        var order = new OrderDto(
+        var order = new Order(
             Id: 10,
             ProductId: 132,
             UserId: "user-1",
@@ -248,7 +248,7 @@ public class OrderProcessingServiceTests
     public async Task HandleShippingStatusChangedAsync_OrderDoesNotExist_DoNotUpdateStatus(OrderShippingStatus orderShippingStatus)
     {
         // Arrange
-        var order = new OrderDto(
+        var order = new Order(
             Id: 10,
             ProductId: 132,
             UserId: "user-1",
@@ -271,7 +271,7 @@ public class OrderProcessingServiceTests
         };
 
         _orderRepositoryMock.Setup(x => x.GetByIdAsync(order.Id))
-            .ReturnsAsync((OrderDto?)null);
+            .ReturnsAsync((Order?)null);
 
         // Act
         await _orderProcessingService.HandleShippingStatusChangedAsync(order.Id, orderShippingStatus);

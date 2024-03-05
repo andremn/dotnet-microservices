@@ -4,7 +4,7 @@ using Orders.Application.Mapping;
 using Orders.Application.Messaging.Messages;
 using Orders.Application.Messaging.Publishers;
 using Orders.Application.Services.Interfaces;
-using Orders.Domain.Dtos;
+using Orders.Domain.Models;
 
 namespace Orders.Application.Services;
 
@@ -14,7 +14,7 @@ public class PaymentService(
     ILogger<PaymentService> logger
 ) : IPaymentService
 {
-    public Task SendApprovalRequestAsync(OrderDto order)
+    public Task SendApprovalRequestAsync(Order order)
     {
         publisher.Publish(order.ToPaymentRequestMessage());
 
