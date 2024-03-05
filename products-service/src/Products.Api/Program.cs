@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Products.Application.Extensions;
 using Products.Infrastructure.Extensions;
+using System.Reflection;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -61,6 +62,10 @@ builder.Services.AddSwaggerGen(options =>
             new List<string>()
         }
     });
+
+    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 });
 
 
@@ -69,7 +74,6 @@ builder.Services.AddInfrastructureServices();
 builder.Services.AddProductsDbContext(builder.Configuration.GetConnectionString("ProductsDb"));
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 ValidatorOptions.Global.LanguageManager.Enabled = false;
 

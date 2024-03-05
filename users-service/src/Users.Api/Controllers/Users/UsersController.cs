@@ -10,8 +10,14 @@ using Users.Domain.Models;
 
 namespace Users.Api.Controllers.Users;
 
+/// <summary>
+/// Users controller.
+/// </summary>
+/// <param name="userService">The <see cref="IUserService"/> to handle user requests.</param>
+/// <param name="jwtConfigSnapshot">The JWT configuration to generate the token.</param>
 [Route("api/users")]
 [ApiController]
+[Produces("application/json")]
 public class UsersController(
     IUserService userService,
     IOptionsSnapshot<JwtConfiguration> jwtConfigSnapshot) : ControllerBase
@@ -19,7 +25,16 @@ public class UsersController(
     private readonly IUserService _userService = userService;
     private readonly JwtConfiguration _jwtConfig = jwtConfigSnapshot.Value;
 
+    /// <summary>
+    /// Creates a user with the specified data.
+    /// </summary>
+    /// <param name="request">The data to create the user.</param>
+    /// <returns>The newly created user.</returns>
+    /// <response code="200">Returns the newly created user.</response>
+    /// <response code="400">If the provided data to create the user is not valid.</response>
     [HttpPost]
+    [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<User>> Post([FromBody] CreateUserRequest request)
     {
         var user = new User(Id: string.Empty, request.FirstName, request.LastName, request.Email);
@@ -34,6 +49,13 @@ public class UsersController(
         return Ok(user);
     }
 
+    /// <summary>
+    /// Logs in a user with the specified data.
+    /// </summary>
+    /// <param name="request">The data to login the user.</param>
+    /// <returns>The authorization token.</returns>
+    /// <response code="200">Returns the newly created user.</response>
+    /// <response code="401">If the user does not exist or cannot be logged in with the provided data.</response>
     [HttpPost("login")]
     public async Task<ActionResult<string>> Post([FromBody] LoginRequest request)
     {

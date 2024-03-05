@@ -7,6 +7,7 @@ using Orders.Application.Extensions;
 using Orders.Application.Messaging.Configurations;
 using Orders.Extensions;
 using Orders.Infrastructure.Extensions;
+using System.Reflection;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -64,6 +65,10 @@ builder.Services.AddSwaggerGen(options =>
             new List<string>()
         }
     });
+
+    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 });
 
 builder.Services.AddHttpContextAccessor();
@@ -73,7 +78,6 @@ builder.Services.AddInfrastructureServices();
 builder.Services.AddDbContext(builder.Configuration.GetConnectionString("OrdersDb"));
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
