@@ -151,5 +151,8 @@ Quando todos os containers estiverem rodando, as APIs estarão disponíveis em:
         ]
         ```
 
+## Fluxo de processamento de um novo pedido
+Ao receber um pedido, o serviço de pedidos (`orders-api`) valida se o produto existe e se há quantidade suficiente do mesmo para o pedido. Em caso de sucesso, o pedido é gravado no banco e uma mensagem do tipo `order-created` é postada na fila `orders-created`. O mesmo serviço consome essa mensagem e processa os próximos passos, atualizando o status de `Criado` para `AwaitingPayment`. Na sequência, o status muda para `PaymentConfirmed`, e por fim muda para `AwaitingShipping`. Para testar o resto do fluxo, é preciso enviar mensagens manualmente para a fila `order-shipping-status-changed` para simular mudanças no status do envio. Os status possíveis são: `Shipped`, `EnRoute`, `Delivered` ou `NotDelivered`.
+
 ## Licença
 Este projeto está licenciado sob a MIT License.
