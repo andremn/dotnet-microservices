@@ -13,6 +13,20 @@ services:
       - apis-network
     restart: unless-stopped    
 
+  postgres:
+    image: postgres
+    container_name: "postgres"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - apis-network
+    restart: unless-stopped
   users-api:
     image: users-api-image
     container_name: "users-api"
