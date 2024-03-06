@@ -1,0 +1,101 @@
+version: "3.4"
+services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: "rabbitmq"
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    networks:
+      - apis-network
+    restart: unless-stopped
+    
+  postgres:
+    image: postgres
+    container_name: "postgres"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - apis-network
+    restart: unless-stopped
+
+  users-api:
+    image: users-api-image
+    container_name: "users-api"
+    expose:
+      - "8080"
+    ports:
+      - 5154:8080
+    networks:
+      - apis-network
+    build:
+      context: ../../users-service
+      dockerfile: ./src/Users.Api/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=development
+      - ConnectionStrings__UsersDb=Host=postgres:5432;Database=users-db;Username=postgres;Password=admin
+      - Jwt__Key=jT0lgBkwaKmIjMuPdezwaorjhDl4UnYK
+    depends_on:
+      - postgres
+    restart: always
+
+  products-api:
+    image: products-api-image
+    container_name: "products-api"
+    expose:
+      - "8080"
+    ports:
+      - 5155:8080
+    networks:
+      - apis-network
+    build:
+      context: ../../products-service
+      dockerfile: ./src/Products.Api/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=development
+      - ConnectionStrings__ProductsDb=Host=postgres:5432;Database=products-db;Username=postgres;Password=admin
+      - Jwt__Key=jT0lgBkwaKmIjMuPdezwaorjhDl4UnYK
+    depends_on:
+      - postgres
+    restart: always
+
+  orders-api:
+    image: orders-api-image
+    container_name: "orders-api"
+    expose:
+      - "8080"
+    ports:
+      - 5156:8080
+    networks:
+      - apis-network
+    build:
+      context: ../../orders-service
+      dockerfile: ./src/Orders.Api/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=development
+      - ConnectionStrings__OrdersDb=Host=postgres:5432;Database=orders-db;Username=postgres;Password=admin
+      - Jwt__Key=jT0lgBkwaKmIjMuPdezwaorjhDl4UnYK
+      - RabbitMq__HostName=rabbitmq
+      - RabbitMq__UserName=guest
+      - RabbitMq__Password=guest
+      - ProductsService__BaseAddress=http://products-api:8080
+    depends_on:
+      - postgres
+      - rabbitmq
+    restart: always
+
+networks:
+  apis-network:
+    driver: bridge
+
+volumes:
+  pg-data:
