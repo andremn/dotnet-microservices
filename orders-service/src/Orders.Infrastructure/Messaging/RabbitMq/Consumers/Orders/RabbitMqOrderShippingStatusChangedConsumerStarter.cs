@@ -14,5 +14,5 @@ public class RabbitMqOrderShippingStatusChangedConsumerStarter(
     ILogger<RabbitMqOrderShippingStatusChangedConsumerStarter> logger
 ) : RabbitMqBaseConsumerStarter<OrderShippingStatusChangedMessage>(rabbitMqService, listener, options, logger)
 {
-    protected override RabbitMqMessageConfiguration MessageConfiguration => Configuration.OrderShippingStatusChanged;
+    protected override string ClientProfileKey => "OrderShippingStatusChanged";
 }

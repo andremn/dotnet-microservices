@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Orders.Application.Messaging;
 using Orders.Application.Messaging.Configurations;
@@ -15,8 +16,8 @@ public abstract class RabbitMqBaseConsumerStarter<TMessage> : IRabbitMqConsumerS
     private readonly IConnection _connection;
     private readonly IModel _model;
     private readonly IListener<TMessage> _listener;
-    private readonly IOptions<RabbitMqConfiguration> _options;
     private readonly ILogger<RabbitMqBaseConsumerStarter<TMessage>> _logger;
+    private readonly RabbitMqClientProfile _clientProfile;
 
     public RabbitMqBaseConsumerStarter(
         IRabbitMqService rabbitMqService,
@@ -25,16 +26,15 @@ public abstract class RabbitMqBaseConsumerStarter<TMessage> : IRabbitMqConsumerS
         ILogger<RabbitMqBaseConsumerStarter<TMessage>> logger)
     {
         _listener = listener;
-        _options = options;
         _logger = logger;
+        _clientProfile = options.Value.ClientProfiles.SingleOrDefault(x => x.Key == ClientProfileKey) ??
+            throw new ArgumentException($"Cannot find client profile with key '{ClientProfileKey}'");
 
         _connection = rabbitMqService.CreateConnection();
         _model = CreateModel();
     }
 
-    protected RabbitMqConfiguration Configuration => _options.Value;
-
-    protected abstract RabbitMqMessageConfiguration MessageConfiguration { get; }
+    protected abstract string ClientProfileKey { get; }
 
     public void StartReceivingMessages()
     {
@@ -63,7 +63,7 @@ public abstract class RabbitMqBaseConsumerStarter<TMessage> : IRabbitMqConsumerS
             }
             catch (JsonException e)
             {
-                _logger.LogError(e, "Exception thrown when deserializing JSON message from queue '{Queue}'", MessageConfiguration.Queue);
+                _logger.LogError(e, "Exception thrown when deserializing JSON message from queue '{Queue}'", _clientProfile.Queue);
 
                 // Ack as this is a format error and will never be resolved
                 _model.BasicAck(eventArgs.DeliveryTag, false);
@@ -72,11 +72,11 @@ public abstract class RabbitMqBaseConsumerStarter<TMessage> : IRabbitMqConsumerS
             {
                 _model.BasicNack(eventArgs.DeliveryTag, multiple: false, requeue: true);
 
-                _logger.LogError(e, "Exception thrown when consuming message from queue '{Queue}'", MessageConfiguration.Queue);
+                _logger.LogError(e, "Exception thrown when consuming message from queue '{Queue}'", _clientProfile.Queue);
             }
         };
 
-        _model.BasicConsume(MessageConfiguration.Queue, false, consumer);
+        _model.BasicConsume(_clientProfile.Queue, false, consumer);
     }
 
     public void Dispose()
@@ -105,10 +105,10 @@ public abstract class RabbitMqBaseConsumerStarter<TMessage> : IRabbitMqConsumerS
     {
         var model = _connection.CreateModel();
 
-        model.QueueDeclare(MessageConfiguration.Queue, durable: true, exclusive: false, autoDelete: false);
-        model.ExchangeDeclare(MessageConfiguration.Exchange, ExchangeType.Topic, durable: true, autoDelete: false);
+        model.QueueDeclare(_clientProfile.Queue, durable: true, exclusive: false, autoDelete: false);
+        model.ExchangeDeclare(_clientProfile.Exchange, ExchangeType.Direct, durable: true, autoDelete: false);
 
-        model.QueueBind(MessageConfiguration.Queue, MessageConfiguration.Exchange, MessageConfiguration.RoutingKey);
+        model.QueueBind(_clientProfile.Queue, _clientProfile.Exchange, _clientProfile.RoutingKey);
 
         return model;
     }

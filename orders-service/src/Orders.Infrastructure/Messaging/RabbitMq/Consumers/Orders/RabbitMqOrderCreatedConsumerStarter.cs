@@ -14,5 +14,5 @@ public class RabbitMqOrderCreatedConsumerStarter(
     ILogger<RabbitMqOrderCreatedConsumerStarter> logger
 ) : RabbitMqBaseConsumerStarter<OrderCreatedMessage>(rabbitMqService, listener, options, logger)
 {
-    protected override RabbitMqMessageConfiguration MessageConfiguration => Configuration.OrderCreated;
+    protected override string ClientProfileKey => "OrderCreated";
 }
