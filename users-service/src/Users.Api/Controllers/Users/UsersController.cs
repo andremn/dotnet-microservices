@@ -32,6 +32,7 @@ public class UsersController(
     /// <returns>The newly created user.</returns>
     /// <response code="200">Returns the newly created user.</response>
     /// <response code="400">If the provided data to create the user is not valid.</response>
+    /// <response code="409">If a user with the same email is already registered.</response>
     [HttpPost]
     [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Dictionary<string, string>), StatusCodes.Status400BadRequest)]
@@ -51,7 +52,7 @@ public class UsersController(
             return Conflict();
         }
 
-        return Ok(user);
+        return Ok(createResult.User);
     }
 
     /// <summary>
