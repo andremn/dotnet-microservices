@@ -1,9 +1,9 @@
 # Projeto de APIs: API de Produtos e API de Pedidos
 
-Este projeto consiste em duas APIs: uma para gerenciar produtos e outra para gerenciar pedidos. Abaixo estão as informações essenciais para entender e executar o projeto.
+Este projeto consiste em três APIs: uma para gerenciar produtos, uma  para gerenciar pedidos e outra para gerenciar usuários. Abaixo estão as informações essenciais para entender e executar o projeto.
 
 ## Descrição
-As APIs de produtos e pedidos permitem que os usuários realizem operações relacionadas a produtos e pedidos. A API de produtos permite adicionar, atualizar, listar e excluir produtos (operações CRUD). A API de pedidos permite criar e consultar pedidos.
+As APIs de produtos e pedidos permitem que os usuários realizem operações relacionadas a produtos e pedidos. A API de produtos permite adicionar, atualizar, listar e excluir produtos (operações CRUD). A API de pedidos permite criar e consultar pedidos. A API de usuários permite o registro de usuários e o login para obtenção de um token de acesso (JWT).
 
 ## Arquitetura
 Os projetos foram estruturados seguindo o Clean Architecture e utilizam as seguintes tecnologias:
