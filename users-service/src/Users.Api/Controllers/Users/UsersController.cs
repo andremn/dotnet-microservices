@@ -34,7 +34,7 @@ public class UsersController(
     /// <response code="400">If the provided data to create the user is not valid.</response>
     [HttpPost]
     [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(Dictionary<string, string>), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<User>> Post([FromBody] CreateUserRequest request)
     {
         var user = new User(Id: string.Empty, request.FirstName, request.LastName, request.Email);
@@ -43,7 +43,12 @@ public class UsersController(
 
         if (!createResult.Success)
         {
-            return BadRequest();
+            if (createResult.Errors.Count > 0)
+            {
+                return BadRequest(createResult.Errors);
+            }
+
+            return Conflict();
         }
 
         return Ok(user);

@@ -27,7 +27,7 @@ internal class UserRepository(
         return result.Succeeded ? new User(user.Id, user.FirstName, user.LastName, email) : null;
     }
 
-    public async Task<bool> CreateAsync(User user, string password)
+    public async Task<User?> CreateAsync(User user, string password)
     {
         var entity = new ApplicationUser
         {
@@ -39,6 +39,6 @@ internal class UserRepository(
 
         var createResult = await _userManager.CreateAsync(entity, password);
 
-        return createResult.Succeeded;
+        return createResult.Succeeded ? new User(entity.Id, entity.FirstName, entity.LastName, user.Email) : null;
     }
 }

@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using Products.Domain.Models;
 
-namespace Products.Application.Services.Validations;
+namespace Products.Application.Services.Validators;
 
 public class ProductValidator : AbstractValidator<Product>
 {

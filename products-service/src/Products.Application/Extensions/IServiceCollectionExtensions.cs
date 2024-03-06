@@ -2,7 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Products.Application.Services;
 using Products.Application.Services.Interfaces;
-using Products.Application.Services.Validations;
+using Products.Application.Services.Validators;
 
 namespace Products.Application.Extensions;
 

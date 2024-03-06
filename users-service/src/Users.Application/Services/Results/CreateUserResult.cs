@@ -1,3 +1,5 @@
-﻿namespace Users.Application.Services.Results;
+﻿using Users.Domain.Models;
 
-public record CreateUserResult(bool Success);
+namespace Users.Application.Services.Results;
+
+public record CreateUserResult(bool Success, User? User, Dictionary<string, string> Errors);

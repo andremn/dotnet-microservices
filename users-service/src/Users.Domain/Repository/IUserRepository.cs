@@ -6,5 +6,5 @@ public interface IUserRepository
 {
     Task<User?> LoginAsync(string email, string password);
 
-    Task<bool> CreateAsync(User user, string password);
+    Task<User?> CreateAsync(User user, string password);
 }
