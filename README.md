@@ -39,8 +39,10 @@ Quando todos os containers estiverem rodando, as APIs estarão disponíveis em:
 - products-api: http://localhost:5155/swagger
 - orders-api: http://localhost:5156/swagger
 
-## Exemplos de algumas requisições
+## Exemplos de requisições
 Com exeção dos endpoints de usuários (`/api/users*`), todas as chamadas devem ser feitas com um token de autorização, que pode ser obtido pelo endpoint `POST /api/users/login`. O token deve então ser passado pelo header da requisição: `Authorization: Bearer <token>`
+
+#### Usuários
 - Registrar um usuário: ```POST /api/users```
     - Requisição:
         ```
@@ -69,6 +71,8 @@ Com exeção dos endpoints de usuários (`/api/users*`), todas as chamadas devem
         }
         ```
     - Resposta (sucesso): token de autenticação (JWT)
+
+#### Produtos
 - Registrar um produto: ```POST /api/products```
     - Requisição:
         ```
@@ -119,6 +123,58 @@ Com exeção dos endpoints de usuários (`/api/users*`), todas as chamadas devem
             }
         ]
         ```
+- Listar um produto específico: ```GET /api/products/2```
+    - Resposta:
+        ```
+        {
+            "id": 2,
+            "name": "Teclado",
+            "description": "Com fio e sem RGB...",
+            "quantity": 2
+            "price": 15.00
+        }
+        ```
+- Atualizar todos os campos de um produto específico: ```PUT /api/products/2```
+    - Requisição:
+        ```
+        {
+            "name": "Teclado novo",
+            "description": "Com fio e sem RGB...",
+            "quantity": 5
+            "price": 50.00
+        }
+        ```
+    - Resposta:
+        ```
+        {
+            "id": 2,
+            "name": "Teclado novo",
+            "description": "Com fio e sem RGB...",
+            "quantity": 5
+            "price": 50.00
+        }
+        ```
+- Atualizar a quantidade de um produto específico: ```PUT /api/products/2/quantity```
+    - Requisição:
+        ```
+        {
+            "quantity": 5
+            "operation": "decrement"
+        }
+        ```
+    - Resposta:
+        ```
+        {
+            "id": 2,
+            "name": "Teclado novo",
+            "description": "Com fio e sem RGB...",
+            "quantity": 5
+            "price": 45.00
+        }
+        ```
+- Deletar um produto específico: ```DELETE /api/products/1```
+
+#### Pedidos
 - Listar todos os pedidos do usuário logado: ```GET /api/orders```
     - Resposta:
         ```
@@ -150,6 +206,23 @@ Com exeção dos endpoints de usuários (`/api/users*`), todas as chamadas devem
                 "createdAt": "2024-03-02T21:11:48.659874Z"
             }
         ]
+        ```
+- Listar um pedido específico: ```GET /api/orders/1```
+    - Resposta:
+        ```
+        {
+            "id": 1,
+            "productId": 1,
+            "userId": "fef659d3-6946-40bd-aaf8-52df14497249",
+            "productSnapshot": {
+                "id": 1,
+                "name": "Mouse",
+                "price": 225.99
+            },
+            "quantity": 3,
+            "status": 4,
+            "createdAt": "2024-03-01T20:32:21.385205Z"
+        }
         ```
 
 ## Fluxo de processamento de um novo pedido
