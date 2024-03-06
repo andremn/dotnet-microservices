@@ -13,9 +13,9 @@ public class UserService(
 {
     private readonly IUserRepository _userRepository = userRepository;
 
-    public async Task<LoginUserResult> LoginAsync(string username, string password)
+    public async Task<LoginUserResult> LoginAsync(string email, string password)
     {
-        var loggedUser = await _userRepository.LoginAsync(username, password);
+        var loggedUser = await _userRepository.LoginAsync(email, password);
 
         return new LoginUserResult(loggedUser);
     }
@@ -30,10 +30,10 @@ public class UserService(
 
             if (createdUser is null)
             {
-                return new CreateUserResult(false, null, new Dictionary<string, string>(0));
+                return new CreateUserResult(false, null, []);
             }
 
-            return new CreateUserResult(true, createdUser, new Dictionary<string, string>(0));
+            return new CreateUserResult(true, createdUser, []);
         }
 
         return new CreateUserResult(false, null, validationResult.Errors.ToDictionary(k => k.PropertyName, v => v.ErrorMessage));

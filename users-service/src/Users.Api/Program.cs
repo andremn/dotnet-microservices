@@ -1,3 +1,4 @@
+using FluentValidation;
 using System.Reflection;
 using Users.Api.Configurations;
 using Users.Application.Extensions;
@@ -19,6 +20,8 @@ builder.Services.AddUsersDbContext(builder.Configuration.GetConnectionString("Us
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.Configure<JwtConfiguration>(builder.Configuration.GetSection("Jwt"));
+
+ValidatorOptions.Global.LanguageManager.Enabled = false;
 
 var app = builder.Build();
 

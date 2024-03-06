@@ -36,14 +36,16 @@ public class UsersControllerTests
     {
         // Arrange
         var createUserRequest = new CreateUserRequest(FirstName: "User", LastName: "Test", Email: "user@mail.com", Password: "pass123");
-        var expectedUser = new User(
+        var userToCreate = new User(
             Id: string.Empty,
             FirstName: "User",
             LastName: "Test",
             Email: "user@mail.com");
 
-        _userServiceMock.Setup(x => x.CreateAsync(expectedUser, createUserRequest.Password))
-            .ReturnsAsync(new CreateUserResult(true));
+        var expectedUser = userToCreate with { Id = "user-1" };
+
+        _userServiceMock.Setup(x => x.CreateAsync(userToCreate, createUserRequest.Password))
+            .ReturnsAsync(new CreateUserResult(true, expectedUser, []));
 
         // Act
         var result = await _usersController.Post(createUserRequest);
@@ -60,17 +62,41 @@ public class UsersControllerTests
     {
         // Arrange
         var createUserRequest = new CreateUserRequest(FirstName: "User", LastName: "Test", Email: "", Password: "");
+        var errors = new Dictionary<string, string>
+        {
+            ["Email"] = "'Email' is not a valid email address",
+            ["Password"] = "'Password' cannot be empty"
+        };
 
         _userServiceMock.Setup(x => x.CreateAsync(It.Is<User>(u => u.Email == createUserRequest.Email), createUserRequest.Password))
-            .ReturnsAsync(new CreateUserResult(false));
+            .ReturnsAsync(new CreateUserResult(false, null, errors));
 
         // Act
         var result = await _usersController.Post(createUserRequest);
 
         // Assert
-        var badRequestResult = result.Result.As<BadRequestResult>();
+        var badRequestResult = result.Result.As<BadRequestObjectResult>();
 
         badRequestResult.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+        badRequestResult.Value.As<Dictionary<string, string>>().Should().BeEquivalentTo(errors);
+    }
+
+    [Fact]
+    public async Task Post_CreateWithError_Returns409Conflict()
+    {
+        // Arrange
+        var createUserRequest = new CreateUserRequest(FirstName: "User", LastName: "Test", Email: "", Password: "");
+
+        _userServiceMock.Setup(x => x.CreateAsync(It.Is<User>(u => u.Email == createUserRequest.Email), createUserRequest.Password))
+            .ReturnsAsync(new CreateUserResult(false, null, []));
+
+        // Act
+        var result = await _usersController.Post(createUserRequest);
+
+        // Assert
+        var badRequestResult = result.Result.As<ConflictResult>();
+
+        badRequestResult.StatusCode.Should().Be(StatusCodes.Status409Conflict);
     }
 
     [Fact]
