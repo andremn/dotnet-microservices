@@ -46,6 +46,7 @@ services:
       - Jwt__Key=jT0lgBkwaKmIjMuPdezwaorjhDl4UnYK
     depends_on:
       - postgres
+    restart: always
 
   products-api:
     image: products-api-image
@@ -65,6 +66,7 @@ services:
       - Jwt__Key=jT0lgBkwaKmIjMuPdezwaorjhDl4UnYK
     depends_on:
       - postgres
+    restart: always
 
   orders-api:
     image: orders-api-image
@@ -89,6 +91,7 @@ services:
     depends_on:
       - postgres
       - rabbitmq
+    restart: always
 
 networks:
   apis-network:
