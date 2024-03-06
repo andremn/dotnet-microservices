@@ -32,6 +32,11 @@ public class OrderService(
 
     public async Task<CreateOrderResult> CreateAsync(int productId, int quantity)
     {
+        if (quantity <= 0)
+        {
+            return CreateOrderResult.InvalidProductQuantity();
+        }
+
         var request = new UpdateProductQuantityRequest(quantity, UpdateProductQuantityOperation.Decrement);
         var updateProductResponse = await productService.UpdateQuantityAsync(productId, request);
 

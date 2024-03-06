@@ -6,5 +6,6 @@ public enum ResultErrorReason
     Validation = 1,
     OrderNotFound = 2,
     ProductNotFound = 3,
-    CannotUpdateProduct = 4
+    CannotUpdateProduct = 4,
+    InvalidProductQuantity = 5
 }

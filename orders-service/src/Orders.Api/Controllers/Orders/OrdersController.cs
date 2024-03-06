@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Orders.Application.Enums;
 using Orders.Application.Services.Interfaces;
 using Orders.Domain.Models;
 
@@ -57,10 +58,12 @@ public class OrdersController(IOrderService orderService) : ControllerBase
     /// <param name="request">The data to create the order.</param>
     /// <returns>The id of the created order.</returns>
     /// <response code="201">Returns the id of the newly created order.</response>
+    /// <response code="400">If the quantity is less than or equal to zero.</response>
     /// <response code="404">If the provided product does not exist or the quantity is not enough for this order request.</response>
     [HttpPost]
     [ProducesResponseType(typeof(CreateOrderResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<CreateOrderResponse>> Post([FromBody] CreateOrderRequest request)
     {
         var result = await orderService.CreateAsync(request.ProductId, request.Quantity);
@@ -72,6 +75,6 @@ public class OrdersController(IOrderService orderService) : ControllerBase
             return CreatedAtAction(nameof(GetById), response, response);
         }
 
-        return NotFound();
+        return result.ErrorReason == ResultErrorReason.InvalidProductQuantity ? BadRequest() : NotFound();
     }
 }
