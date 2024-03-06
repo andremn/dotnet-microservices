@@ -14,5 +14,5 @@ public class RabbitMqOrderShippingRequestConsumerStarter(
     ILogger<RabbitMqOrderShippingRequestConsumerStarter> logger
 ) : RabbitMqBaseConsumerStarter<OrderShippingRequestMessage>(rabbitMqService, listener, options, logger)
 {
-    protected override RabbitMqMessageConfiguration MessageConfiguration => Configuration.OrderShippingRequest;
+    protected override string ClientProfileKey => "OrderShippingRequest";
 }

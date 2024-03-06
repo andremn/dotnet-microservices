@@ -7,7 +7,7 @@ namespace Orders.Application.Messaging.Publishers;
 public class OrderShippingRequestPublisher(
     IRabbitMqProducerService rabbitMqProducerService,
     IOptions<RabbitMqConfiguration> options
-) : RabbitMqPublisher<OrderShippingRequestMessage>(rabbitMqProducerService), IPublisher<OrderShippingRequestMessage>
+) : RabbitMqPublisher<OrderShippingRequestMessage>(rabbitMqProducerService, options), IPublisher<OrderShippingRequestMessage>
 {
-    protected override RabbitMqMessageConfiguration MessageConfiguration => options.Value.OrderShippingRequest;
+    protected override string ClientProfileKey => "OrderShippingRequest";
 }

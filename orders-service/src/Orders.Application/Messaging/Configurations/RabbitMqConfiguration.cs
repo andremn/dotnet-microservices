@@ -8,13 +8,5 @@ public record RabbitMqConfiguration
 
     public string Password { get; set; } = string.Empty;
 
-    public RabbitMqMessageConfiguration OrderCreated { get; set; } = new RabbitMqMessageConfiguration();
-
-    public RabbitMqMessageConfiguration OrderPaymentStatusChanged { get; set; } = new RabbitMqMessageConfiguration();
-
-    public RabbitMqMessageConfiguration OrderShippingStatusChanged { get; set; } = new RabbitMqMessageConfiguration();
-
-    public RabbitMqMessageConfiguration OrderPaymentRequest { get; set; } = new RabbitMqMessageConfiguration();
-
-    public RabbitMqMessageConfiguration OrderShippingRequest { get; set; } = new RabbitMqMessageConfiguration();
+    public ICollection<RabbitMqClientProfile> ClientProfiles { get; set; } = [];
 }

@@ -7,7 +7,7 @@ namespace Orders.Application.Messaging.Publishers;
 public class OrderPaymentStatusChangedPublisher(
     IRabbitMqProducerService rabbitMqProducerService,
     IOptions<RabbitMqConfiguration> options
-) : RabbitMqPublisher<OrderPaymentStatusChangedMessage>(rabbitMqProducerService), IPublisher<OrderPaymentStatusChangedMessage>
+) : RabbitMqPublisher<OrderPaymentStatusChangedMessage>(rabbitMqProducerService, options), IPublisher<OrderPaymentStatusChangedMessage>
 {
-    protected override RabbitMqMessageConfiguration MessageConfiguration => options.Value.OrderPaymentStatusChanged;
+    protected override string ClientProfileKey => "OrderPaymentStatusChanged";
 }

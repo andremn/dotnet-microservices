@@ -7,7 +7,7 @@ namespace Orders.Application.Messaging.Publishers;
 public class OrderPaymentRequestPublisher(
     IRabbitMqProducerService rabbitMqProducerService,
     IOptions<RabbitMqConfiguration> options
-) : RabbitMqPublisher<OrderPaymentRequestMessage>(rabbitMqProducerService), IPublisher<OrderPaymentRequestMessage>
+) : RabbitMqPublisher<OrderPaymentRequestMessage>(rabbitMqProducerService, options), IPublisher<OrderPaymentRequestMessage>
 {
-    protected override RabbitMqMessageConfiguration MessageConfiguration => options.Value.OrderPaymentRequest;
+    protected override string ClientProfileKey => "OrderPaymentRequest";
 }

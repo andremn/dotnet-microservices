@@ -7,7 +7,7 @@ namespace Orders.Application.Messaging.Publishers;
 public class OrderCreatedPublisher(
     IRabbitMqProducerService rabbitMqProducerService,
     IOptions<RabbitMqConfiguration> options
-) : RabbitMqPublisher<OrderCreatedMessage>(rabbitMqProducerService), IPublisher<OrderCreatedMessage>
+) : RabbitMqPublisher<OrderCreatedMessage>(rabbitMqProducerService, options), IPublisher<OrderCreatedMessage>
 {
-    protected override RabbitMqMessageConfiguration MessageConfiguration => options.Value.OrderCreated;
+    protected override string ClientProfileKey => "OrderCreated";
 }

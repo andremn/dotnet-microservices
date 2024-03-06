@@ -14,5 +14,5 @@ public class RabbitMqOrderPaymentRequestConsumerStarter(
     ILogger<RabbitMqOrderPaymentRequestConsumerStarter> logger
 ) : RabbitMqBaseConsumerStarter<OrderPaymentRequestMessage>(rabbitMqService, listener, options, logger)
 {
-    protected override RabbitMqMessageConfiguration MessageConfiguration => Configuration.OrderPaymentRequest;
+    protected override string ClientProfileKey => "OrderPaymentRequest";
 }
