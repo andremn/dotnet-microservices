@@ -4,7 +4,7 @@ namespace Users.Domain.Repository;
 
 public interface IUserRepository
 {
-    Task<User?> LoginAsync(string email, string password);
+    Task<User?> GetByEmailAsync(string email);
 
     Task<User?> CreateAsync(User user, string password);
 }

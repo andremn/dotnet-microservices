@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Users.Application.Services;
 using Users.Infrastructure.Identity;
 using Users.Infrastructure.Data;
 using Users.Domain.Repository;
@@ -22,6 +23,7 @@ public static class IServiceCollectionExtensions
         .AddDefaultTokenProviders();
 
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IUserSignInService, UserSignInService>();
 
         return services;
     }

@@ -6,25 +6,14 @@ using Users.Infrastructure.Identity;
 namespace Users.Infrastructure.Data.Repositories;
 
 internal class UserRepository(
-    UserManager<ApplicationUser> userManager,
-    SignInManager<ApplicationUser> signInManager
+    UserManager<ApplicationUser> userManager
 ) : IUserRepository
 {
-    private readonly UserManager<ApplicationUser> _userManager = userManager;
-    private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
-
-    public async Task<User?> LoginAsync(string email, string password)
+    public async Task<User?> GetByEmailAsync(string email)
     {
-        var user = await _userManager.FindByEmailAsync(email);
+        var entity = await userManager.FindByEmailAsync(email);
 
-        if (user is null)
-        {
-            return null;
-        }
-
-        var result = await _signInManager.PasswordSignInAsync(user, password, isPersistent: false, lockoutOnFailure: false);
-
-        return result.Succeeded ? new User(user.Id, user.FirstName, user.LastName, email) : null;
+        return entity is null ? null : new User(entity.Id, entity.FirstName, entity.LastName, email);
     }
 
     public async Task<User?> CreateAsync(User user, string password)
@@ -37,7 +26,7 @@ internal class UserRepository(
             UserName = user.Email
         };
 
-        var createResult = await _userManager.CreateAsync(entity, password);
+        var createResult = await userManager.CreateAsync(entity, password);
 
         return createResult.Succeeded ? new User(entity.Id, entity.FirstName, entity.LastName, user.Email) : null;
     }

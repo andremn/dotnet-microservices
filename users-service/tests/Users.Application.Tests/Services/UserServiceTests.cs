@@ -11,15 +11,18 @@ namespace Users.Application.Tests.Services;
 
 public class UserServiceTests
 {
+    private readonly Mock<IUserSignInService> _userSignInServiceMock;
     private readonly Mock<IUserRepository> _userRepositoryMock;
     private readonly Mock<IValidator<User>> _userValidatorMock;
     private readonly UserService _userService;
 
     public UserServiceTests()
     {
+        _userSignInServiceMock = new Mock<IUserSignInService>();
         _userRepositoryMock = new Mock<IUserRepository>();
         _userValidatorMock = new Mock<IValidator<User>>();
-        _userService = new UserService(_userRepositoryMock.Object, _userValidatorMock.Object);
+        _userService = new UserService(_userSignInServiceMock.Object,
+            _userRepositoryMock.Object, _userValidatorMock.Object);
     }
 
     [Fact]
@@ -103,8 +106,11 @@ public class UserServiceTests
         var expectedUser = new User("user-1", "User", "Test", "user@mail.com");
         var expectedResult = new LoginUserResult(expectedUser);
 
-        _userRepositoryMock.Setup(x => x.LoginAsync(email, password))
+        _userRepositoryMock.Setup(x => x.GetByEmailAsync(email))
             .ReturnsAsync(expectedUser);
+
+        _userSignInServiceMock.Setup(x => x.SignInAsync(email, password))
+            .ReturnsAsync(true);
 
         // Act
         var actualResult = await _userService.LoginAsync(email, password);
@@ -114,14 +120,36 @@ public class UserServiceTests
     }
 
     [Fact]
-    public async Task LoginAsync_InvalidLogin_ReturnsNullUser()
+    public async Task LoginAsync_InvalidLogin_ReturnsSuccessWithUserData()
+    {
+        // Arrange
+        var email = "user@mail.com";
+        var password = "password";
+        var expectedUser = new User("user-1", "User", "Test", "user@mail.com");
+        var expectedResult = new LoginUserResult(null);
+
+        _userRepositoryMock.Setup(x => x.GetByEmailAsync(email))
+            .ReturnsAsync(expectedUser);
+
+        _userSignInServiceMock.Setup(x => x.SignInAsync(email, password))
+            .ReturnsAsync(false);
+
+        // Act
+        var actualResult = await _userService.LoginAsync(email, password);
+
+        // Assert
+        actualResult.Should().BeEquivalentTo(expectedResult);
+    }
+
+    [Fact]
+    public async Task LoginAsync_UserNotFound_ReturnsNullUser()
     {
         // Arrange
         var email = "user@mail.com";
         var password = "password";
         var expectedResult = new LoginUserResult(null);
 
-        _userRepositoryMock.Setup(x => x.LoginAsync(email, password))
+        _userRepositoryMock.Setup(x => x.GetByEmailAsync(email))
             .ReturnsAsync((User?)null);
 
         // Act
