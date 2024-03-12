@@ -20,7 +20,7 @@ public class OrderRepository(OrdersDbContext dbContext) : IOrderRepository
         var entity = await dbContext.Orders
             .AsNoTracking()
             .Include(x => x.ProductSnapshot)
-            .SingleOrDefaultAsync(x => x.Id == id);
+            .FirstOrDefaultAsync(x => x.Id == id);
 
         return entity?.ToModel();
     }
