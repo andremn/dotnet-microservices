@@ -7,35 +7,41 @@ using Users.Domain.Repository;
 namespace Users.Application.Services;
 
 public class UserService(
+    IUserSignInService signInManager,
     IUserRepository userRepository,
     IValidator<User> userValidator
 ) : IUserService
 {
-    private readonly IUserRepository _userRepository = userRepository;
-
     public async Task<LoginUserResult> LoginAsync(string email, string password)
     {
-        var loggedUser = await _userRepository.LoginAsync(email, password);
+        var user = await userRepository.GetByEmailAsync(email);
 
-        return new LoginUserResult(loggedUser);
+        if (user is null)
+        {
+            return new LoginUserResult(null);
+        }
+
+        var success = await signInManager.SignInAsync(email, password);
+
+        return new LoginUserResult(success ? user : null);
     }
 
     public async Task<CreateUserResult> CreateAsync(User user, string password)
     {
         var validationResult = userValidator.Validate(user);
 
-        if (validationResult.IsValid)
+        if (!validationResult.IsValid)
         {
-            var createdUser = await _userRepository.CreateAsync(user, password);
-
-            if (createdUser is null)
-            {
-                return new CreateUserResult(false, null, []);
-            }
-
-            return new CreateUserResult(true, createdUser, []);
+            return new CreateUserResult(false, null,
+                validationResult.Errors.ToDictionary(
+                    k => k.PropertyName, 
+                    v => v.ErrorMessage));
         }
 
-        return new CreateUserResult(false, null, validationResult.Errors.ToDictionary(k => k.PropertyName, v => v.ErrorMessage));
+        var createdUser = await userRepository.CreateAsync(user, password);
+
+        return createdUser is null ? 
+            new CreateUserResult(false, null, []) : 
+            new CreateUserResult(true, createdUser, []);
     }
 }
